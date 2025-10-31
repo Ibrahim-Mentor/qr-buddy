@@ -3,7 +3,7 @@
 A sleek, mobile-first, privacy-focused QR code generator and scanner built with pure HTML, CSS, and JavaScript. This single-page application works entirely offline and in your browser—no data ever leaves your device.
 
 ![App Screenshot](https://i.imgur.com/your-screenshot-url.png)
-*(Replace the URL above with a link to your own screenshot)*
+
 
 ## ✨ Features
 
