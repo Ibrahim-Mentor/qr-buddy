@@ -38,7 +38,6 @@
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior: none;
-            /* Use a slightly lighter bg for the main app "chrome" */
             background-color: #0d071a;
         }
         
@@ -121,6 +120,33 @@
         /* Notification */
         #clipboard-notification {
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        /* Custom range slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #c058f3;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #c058f3;
+            border-radius: 50%;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -294,7 +320,7 @@
                     </div>
             </div>
 
-            <div class="space-y-6">
+            <div class="space-y-6 pb-24">
                 <div>
                     <label for="qr-data" class="block text-sm font-medium text-white/70 mb-2">Data (URL, text, etc.)</label>
                     <textarea id="qr-data" rows="3" class="w-full input-glass rounded-lg p-3" placeholder="https://example.com"></textarea>
@@ -351,8 +377,27 @@
                     </div>
                 </div>
                 
-                <button id="btn-save-generated" class="w-full bg-brand-gradient text-white font-semibold py-4 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
-                    Save & View Code
+                <div class="card rounded-lg p-4">
+                    <label class="text-lg font-semibold mb-3 block">Margin</label>
+                    <div class="flex items-center space-x-4">
+                        <input id="qr-margin" type="range" min="0" max="25" value="5" class="w-full">
+                        <span id="qr-margin-value" class="text-white/70 w-8 text-right">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fixed bottom-0 left-0 right-0 p-6 bg-brand-dark border-t border-white/10 grid grid-cols-3 gap-4">
+                <button id="btn-save" class="w-full bg-white/90 hover:bg-white text-brand-dark font-semibold py-3 px-4 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                    <span>Save</span>
+                </button>
+                <button id="btn-share" class="w-full bg-white/90 hover:bg-white text-brand-dark font-semibold py-3 px-4 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 100-2.186m0 2.186c-.18-.324-.283-.696-.283-1.093s.103-.77.283-1.093m0 2.186l-9.566-5.314" /></svg>
+                    <span>Share</span>
+                </button>
+                <button id="btn-delete" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12.064 0A48.108 48.108 0 017.625 5.5h8.75a48.108 48.108 0 013.478-.397m-12.064 0L6.18 4.809a2.25 2.25 0 012.244-2.077h8.152a2.25 2.25 0 012.244 2.077L19.23 5.79m-14.456 0h14.456" /></svg>
+                    <span>Delete</span>
                 </button>
             </div>
         </div>
@@ -429,7 +474,15 @@
             const cornerDotColorInput = document.getElementById('corner-dot-color');
             const logoUpload = document.getElementById('logo-upload');
             const clearLogoBtn = document.getElementById('clear-logo');
-            const saveGeneratedBtn = document.getElementById('btn-save-generated');
+            
+            // NEW: Margin Slider
+            const marginSlider = document.getElementById('qr-margin');
+            const marginValue = document.getElementById('qr-margin-value');
+            
+            // NEW: Editor Buttons
+            const saveBtn = document.getElementById('btn-save');
+            const shareBtn = document.getElementById('btn-share');
+            const deleteBtn = document.getElementById('btn-delete');
 
             // Result Page Elements
             const qrCanvasResult = document.getElementById('qr-canvas-result');
@@ -453,7 +506,8 @@
                 backgroundOptions: { color: "#ffffff" },
                 cornersSquareOptions: { type: "square" },
                 cornersDotOptions: { color: "#0d071a" },
-                imageOptions: { crossOrigin: "anonymous", margin: 5, imageSize: 0.4 }
+                imageOptions: { crossOrigin: "anonymous", margin: 5, imageSize: 0.4 },
+                margin: 5
             });
             qrCodeGenerate.append(qrCanvasGenerate);
             
@@ -463,7 +517,8 @@
                 backgroundOptions: { color: "#ffffff" },
                 cornersSquareOptions: { type: "square" },
                 cornersDotOptions: { color: "#0d071a" },
-                imageOptions: { crossOrigin: "anonymous", margin: 5, imageSize: 0.4 }
+                imageOptions: { crossOrigin: "anonymous", margin: 5, imageSize: 0.4 },
+                margin: 5
             });
             qrCodeResult.append(qrCanvasResult);
             
@@ -537,6 +592,7 @@
                     cornersSquareOptions: options.cornersSquareOptions,
                     cornersDotOptions: options.cornersDotOptions,
                     image: options.image,
+                    margin: options.margin
                 });
                 document.getElementById('result-data-text').textContent = data;
                 showPage('page-result');
@@ -593,6 +649,7 @@
                         dotsOptions: { color: "#0d071a", type: "dots" },
                         backgroundOptions: { color: "#ffffff" },
                         image: item.image,
+                        margin: 2
                     });
                     qrPreview.append(previewEl);
                 }
@@ -605,10 +662,16 @@
                 `;
                 el.appendChild(textEl);
                 
+                // NEW: Click history item to open editor
                 el.addEventListener('click', () => {
-                    updateQRCode(item.data);
+                    // Load data into the editor
                     dataInput.value = item.data;
-                    showResultPage(item.data);
+                    logoImage = item.image || null; 
+                    // NOTE: We can't restore colors/styles/margin as they aren't saved.
+                    // This is a limitation of only saving data/image.
+                    // We'll just load the data and default styles.
+                    updateQRCode(item.data); 
+                    showPage('page-generate-editor');
                 });
                 return el;
             }
@@ -623,7 +686,8 @@
                     dotsOptions: { color: dotColorInput.value, type: dotStyleSelect.value },
                     backgroundOptions: { color: bgColorInput.value },
                     cornersSquareOptions: { type: cornerSquareSelect.value },
-                    cornersDotOptions: { color: cornerDotColorInput.value }
+                    cornersDotOptions: { color: cornerDotColorInput.value },
+                    margin: parseInt(marginSlider.value, 10) // NEW
                 });
             }
 
@@ -724,7 +788,16 @@
 
             // Generate Type Buttons
             document.querySelectorAll('.btn-generate-type').forEach(btn => {
-                btn.addEventListener('click', () => showPage('page-generate-editor'));
+                btn.addEventListener('click', () => {
+                    // Reset form when creating a new code
+                    dataInput.value = 'https://example.com';
+                    logoImage = null;
+                    logoUpload.value = '';
+                    marginSlider.value = 5;
+                    marginValue.textContent = 5;
+                    updateQRCode();
+                    showPage('page-generate-editor');
+                });
             });
 
             // History Clear Buttons
@@ -759,18 +832,54 @@
                 logoUpload.value = '';
                 updateQRCode();
             });
-            saveGeneratedBtn.addEventListener('click', () => {
+            
+            // NEW: Margin Slider
+            marginSlider.addEventListener('input', () => {
+                marginValue.textContent = marginSlider.value;
+                updateQRCode();
+            });
+            
+            // NEW: Editor Button Listeners
+            saveBtn.addEventListener('click', () => {
                 const data = dataInput.value;
                 if (!data || data.trim() === '') {
                     showNotification('Cannot save empty data!', true);
                     return;
                 }
-                const history = loadHistory(GENERATED_HISTORY_KEY);
-                if (!history.find(item => item.data === data)) {
-                    history.unshift({ data: data, timestamp: new Date().toISOString(), image: logoImage });
-                    saveHistory(GENERATED_HISTORY_KEY, history);
+                let history = loadHistory(GENERATED_HISTORY_KEY);
+                // Find and remove old item if it exists (to update it)
+                history = history.filter(item => item.data !== data); 
+                // Add new/updated item to the top
+                history.unshift({ data: data, timestamp: new Date().toISOString(), image: logoImage });
+                saveHistory(GENERATED_HISTORY_KEY, history);
+                showNotification('Saved to history!');
+                renderRecentHistory(); // Update home page
+            });
+
+            shareBtn.addEventListener('click', () => {
+                showResultPage(currentQRData);
+            });
+
+            deleteBtn.addEventListener('click', () => {
+                const data = dataInput.value;
+                if (!data || data.trim() === '') {
+                    showNotification('Nothing to delete!', true);
+                    return;
                 }
-                showResultPage(data);
+                let history = loadHistory(GENERATED_HISTORY_KEY);
+                const newHistory = history.filter(item => item.data !== data);
+                
+                if (history.length === newHistory.length) {
+                    showNotification('Item not in history.', true);
+                } else {
+                    saveHistory(GENERATED_HISTORY_KEY, newHistory);
+                    showNotification('Deleted from history!');
+                    // Clear the form
+                    dataInput.value = 'https://example.com';
+                    clearLogoBtn.click();
+                    updateQRCode();
+                }
+                renderRecentHistory(); // Update home page
             });
             
             // Result Page Actions
