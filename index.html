@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
-        // Configure Tailwind with the new color scheme from Image 1
+        // Configure Tailwind with the new color scheme
         tailwind.config = {
             theme: {
                 extend: {
@@ -24,7 +24,6 @@
                         'brand-light': '#1a0e38',
                         'brand-pink': '#e45b8b',
                         'brand-purple': '#c058f3',
-                        'brand-yellow': '#f5d143', // From Image 2 for scanner
                     },
                     backgroundImage: {
                         'brand-gradient': 'linear-gradient(to right, #c058f3, #e45b8b)',
@@ -39,25 +38,46 @@
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior: none;
+            /* Use a slightly lighter bg for the main app "chrome" */
+            background-color: #0d071a;
         }
-
+        
+        /* Glassmorphism card style */
+        .card {
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
         /* Page transition styles */
         .page {
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
             will-change: opacity, transform;
+            position: fixed;
+            inset: 0;
+            opacity: 1;
+            transform: scale(1);
         }
-
         .page-hidden {
             opacity: 0;
             transform: scale(0.98);
             pointer-events: none;
         }
 
-        /* Custom glassmorphism card style */
-        .card {
-            background-color: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* App pages (for tab bar) */
+        .app-page {
+            display: none; /* Hidden by default, JS will show */
+        }
+        .app-page.active {
+            display: block;
+        }
+
+        /* Bottom Tab Bar */
+        .tab-btn.active svg {
+            color: #c058f3;
+        }
+        .tab-btn.active span {
+            color: #c058f3;
         }
 
         /* Custom input styles */
@@ -95,42 +115,8 @@
             cursor: pointer;
             overflow: hidden;
         }
-        input[type="color"]::-webkit-color-swatch-wrapper {
-            padding: 0;
-        }
-        input[type="color"]::-webkit-color-swatch {
-            border: none;
-        }
-
-        /* Scanner overlay */
-        #scanner-frame {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 75vw;
-            height: 75vw;
-            max-width: 300px;
-            max-height: 300px;
-            border-radius: 1.5rem;
-            box-shadow: 0 0 0 6px #f5d143, inset 0 0 0 6px #f5d143;
-        }
-        #scanner-line {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 100%;
-            height: 2px;
-            background: #f5d143;
-            box-shadow: 0 0 10px #f5d143;
-            animation: scan 2.5s infinite ease-in-out;
-        }
-
-        @keyframes scan {
-            0% { transform: translateY(-100px); opacity: 0.5; }
-            50% { transform: translateY(100px); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0.5; }
-        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; }
 
         /* Notification */
         #clipboard-notification {
@@ -138,7 +124,7 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-brand-light to-brand-dark text-white antialiased h-[100dvh] w-screen overflow-hidden">
+<body class="bg-brand-dark text-white antialiased h-[100dvh] w-screen overflow-hidden">
 
     <div id="clipboard-notification" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-2 z-50">
         Copied to clipboard!
@@ -146,7 +132,7 @@
     
     <div class="relative h-full w-full">
 
-        <div id="page-welcome" class="page fixed inset-0 flex flex-col items-center justify-between p-8">
+        <div id="page-welcome" class="page flex flex-col items-center justify-between p-8 bg-gradient-to-br from-brand-light to-brand-dark">
             <div class="flex-grow flex flex-col items-center justify-center text-center">
                 <div class="w-32 h-32 card rounded-3xl flex items-center justify-center mb-8">
                     <svg class="w-20 h-20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -162,69 +148,145 @@
             </button>
         </div>
 
-        <div id="page-main" class="page page-hidden fixed inset-0 flex flex-col items-center justify-center p-8 space-y-6">
-            <h1 class="text-4xl font-bold text-center mb-12">QR Suite</h1>
-            <button id="btn-goto-scan" class="w-full max-w-xs card rounded-2xl p-6 flex flex-col items-center space-y-4 transition-transform duration-200 hover:scale-105 active:scale-95">
-                <svg class="w-12 h-12 bg-brand-gradient rounded-full p-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 9.375v-4.5zM3.75 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 19.125v-4.5zM13.5 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 9.375v-4.5zM13.5 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 19.125v-4.5z" />
-                </svg>
-                <span class="text-xl font-semibold">Scan QR Code</span>
-            </button>
-            <button id="btn-goto-generate" class="w-full max-w-xs card rounded-2xl p-6 flex flex-col items-center space-y-4 transition-transform duration-200 hover:scale-105 active:scale-95">
-                <svg class="w-12 h-12 bg-brand-gradient rounded-full p-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                <span class="text-xl font-semibold">Generate QR Code</span>
-            </button>
-            <button id="btn-goto-history" class="w-full max-w-xs card rounded-2xl py-3 px-6 text-center text-white/70 transition-colors hover:text-white">
-                View History
-            </button>
-        </div>
+        <div id="page-app-shell" class="page page-hidden flex flex-col h-full bg-brand-dark">
+            <div class="flex-grow overflow-y-auto pb-24">
+                
+                <div id="app-page-main" class="app-page p-6">
+                    <h1 class="text-3xl font-bold mb-6">QR Code Generator</h1>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <button id="btn-goto-generate" class="bg-brand-gradient p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95">
+                            <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            <span class="font-semibold">Generate QR</span>
+                        </button>
+                        <button id="btn-goto-scan" class="card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95">
+                            <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 9.375v-4.5zM3.75 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 19.125v-4.5zM13.5 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 9.375v-4.5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 19.125v-4.5z" />
+                            </svg>
+                            <span class="font-semibold">Scan QR</span>
+                        </button>
+                    </div>
 
-        <div id="page-scan" class="page page-hidden fixed inset-0 flex flex-col bg-black">
-            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-10 bg-black/30">
-                <button class="btn-back p-2 rounded-full hover:bg-white/20">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-white">Recent QR Codes</h2>
+                        <button id="btn-see-all-history" class="text-sm font-medium text-brand-purple hover:text-brand-pink">See All</button>
+                    </div>
+                    <div id="recent-history-list" class="space-y-3">
+                        </div>
+                </div>
+
+                <div id="app-page-history" class="app-page p-6">
+                    <h1 class="text-3xl font-bold mb-6">History</h1>
+                    <div class="flex-grow space-y-6">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <h2 class="text-xl font-semibold text-white">Generated</h2>
+                                <button id="clear-generated-history" class="text-sm text-brand-pink hover:text-brand-pink/80">Clear All</button>
+                            </div>
+                            <div id="generated-history-list" class="space-y-3">
+                                </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <h2 class="text-xl font-semibold text-white">Scanned</h2>
+                                <button id="clear-scanned-history" class="text-sm text-brand-pink hover:text-brand-pink/80">Clear All</button>
+                            </div>
+                            <div id="scanned-history-list" class="space-y-3">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="bottom-tab-bar" class="fixed bottom-0 left-0 right-0 h-20 card border-t-0 border-l-0 border-r-0 rounded-t-2xl flex justify-around items-center">
+                <button class="tab-btn flex flex-col items-center text-white/50" data-page="app-page-main">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    <span class="text-xs font-medium mt-1">Home</span>
+                </button>
+                <button class="tab-btn flex flex-col items-center text-white/50" data-page="page-generate-type">
+                    <svg class="w-10 h-10 p-2 bg-brand-gradient rounded-full -mt-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
                 </button>
-                <div class="flex space-x-4">
-                    <button class="p-2 rounded-full hover:bg-white/20">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                        </svg>
-                    </button>
-                    <button class="p-2 rounded-full hover:bg-white/20">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.092 1.21-.138 2.43-.138 3.662s.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.092-1.21.138-2.43.138-3.662zM12 12V9m0 3v3m0-3h3m-3 0H9" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <div class="relative w-full flex-grow overflow-hidden">
-                <video id="scan-video" playsinline class="w-full h-full object-cover" style="transform: scaleX(-1);"></video>
-                <canvas id="scan-canvas" class="hidden"></canvas>
-                <div id="scanner-frame">
-                    <div id="scanner-line"></div>
-                </div>
-            </div>
-             <div class="p-6 flex justify-center items-center z-10 bg-black/30">
-                <button id="btn-stop-scan" class="w-16 h-16 bg-brand-yellow rounded-full flex items-center justify-center text-black/70">
-                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+                <button class="tab-btn flex flex-col items-center text-white/50" data-page="app-page-history">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
+                    <span class="text-xs font-medium mt-1">History</span>
                 </button>
             </div>
         </div>
-
-        <div id="page-generate" class="page page-hidden fixed inset-0 flex flex-col p-6 overflow-y-auto">
+        
+        <div id="page-generate-type" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto">
             <div class="flex items-center mb-6 flex-shrink-0">
                 <button class="btn-back p-2 -ml-2 rounded-full hover:bg-white/10">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                 </button>
-                <h1 class="text-2xl font-semibold ml-2">Generate Code</h1>
+                <h1 class="text-2xl font-semibold ml-2">Generate QR Code</h1>
+            </div>
+            
+            <p class="text-white/70 mb-6">What do you want to share?</p>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="url">
+                    <svg class="w-10 h-10 text-brand-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                    </svg>
+                    <span class="font-semibold">URL</span>
+                </button>
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="text">
+                    <svg class="w-10 h-10 text-brand-pink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    <span class="font-semibold">Text</span>
+                </button>
+                </div>
+        </div>
+
+        <div id="page-scan" class="page page-hidden flex flex-col bg-black">
+            <div class="relative w-full h-full overflow-hidden">
+                <video id="scan-video" playsinline class="w-full h-full object-cover hidden" style="transform: scaleX(-1);"></video>
+                <canvas id="scan-canvas" class="hidden"></canvas>
+            </div>
+             
+            <div id="scan-overlay" class="absolute inset-0 p-8 flex flex-col items-center justify-between bg-black/80">
+                <div class="w-full flex justify-start">
+                    <button class="btn-back p-2 rounded-full hover:bg-white/20">
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex flex-col items-center text-center">
+                    <svg class="w-24 h-24 mb-6 text-white/80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 9.375v-4.5zM3.75 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 19.125v-4.5zM13.5 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 9.375v-4.5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 19.125v-4.5z" />
+                    </svg>
+                    <h2 class="text-3xl font-bold mb-2">Ready to Scan</h2>
+                    <p class="text-white/60">Tap to start scanning QR codes</p>
+                </div>
+                <button id="btn-start-scan" class="w-full max-w-xs bg-brand-gradient text-white font-semibold py-4 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
+                    Start Camera
+                </button>
+            </div>
+        </div>
+
+        <div id="page-generate-editor" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto">
+            <div class="flex items-center mb-6 flex-shrink-0">
+                <button class="btn-back-to-type p-2 -ml-2 rounded-full hover:bg-white/10">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+                <h1 class="text-2xl font-semibold ml-2">QR Code Editor</h1>
             </div>
 
             <div class="flex flex-col items-center mb-6 card rounded-2xl p-6">
@@ -232,53 +294,61 @@
                     </div>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-6">
                 <div>
                     <label for="qr-data" class="block text-sm font-medium text-white/70 mb-2">Data (URL, text, etc.)</label>
                     <textarea id="qr-data" rows="3" class="w-full input-glass rounded-lg p-3" placeholder="https://example.com"></textarea>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="dot-style" class="block text-sm font-medium text-white/70 mb-2">Dot Style</label>
-                        <select id="dot-style" class="w-full input-glass rounded-lg p-3">
-                            <option value="square">Square</option>
-                            <option value="dots">Dots</option>
-                            <option value="rounded">Rounded</option>
-                            <option value="extra-rounded">Extra Rounded</option>
-                            <option value="classy">Classy</option>
-                            <option value="classy-rounded">Classy Rounded</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="corner-square-style" class="block text-sm font-medium text-white/70 mb-2">Corner Style</label>
-                        <select id="corner-square-style" class="w-full input-glass rounded-lg p-3">
-                            <option value="square">Square</option>
-                            <option value="dot">Dot</option>
-                            <option value="extra-rounded">Extra Rounded</option>
-                        </select>
+                <div class="card rounded-lg p-4">
+                    <label class="text-lg font-semibold">Add Logo</label>
+                    <div class="flex items-center space-x-4 mt-3">
+                        <input id="logo-upload" type="file" accept="image/png, image/jpeg, image/svg+xml" class="w-full text-sm text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:opacity-90 transition-all duration-150 ease-in-out">
+                        <button id="clear-logo" class="text-brand-pink text-sm flex-shrink-0">Clear</button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-white/70 mb-2">Dots</label>
-                        <input id="dot-color" type="color" value="#c058f3">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-white/70 mb-2">Background</label>
-                        <input id="bg-color" type="color" value="#ffffff">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-white/70 mb-2">Corners</label>
-                        <input id="corner-dot-color" type="color" value="#0d071a">
+                <div class="card rounded-lg p-4">
+                    <label class="text-lg font-semibold mb-3 block">Colors</label>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-white/70 mb-2">Dots</label>
+                            <input id="dot-color" type="color" value="#c058f3">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-white/70 mb-2">Background</label>
+                            <input id="bg-color" type="color" value="#ffffff">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-white/70 mb-2">Corners</label>
+                            <input id="corner-dot-color" type="color" value="#0d071a">
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <label for="logo-upload" class="block text-sm font-medium text-white/70 mb-2">Embed Logo (Optional)</label>
-                    <input id="logo-upload" type="file" accept="image/png, image/jpeg, image/svg+xml" class="w-full text-sm text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-gradient file:text-white hover:file:opacity-90 transition-all duration-150 ease-in-out">
-                    <button id="clear-logo" class="text-xs text-brand-pink hover:text-brand-pink/80 mt-2">Clear Logo</button>
+                <div class="card rounded-lg p-4">
+                    <label class="text-lg font-semibold mb-3 block">Style</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="dot-style" class="block text-sm font-medium text-white/70 mb-2">Dot Style</label>
+                            <select id="dot-style" class="w-full input-glass rounded-lg p-3">
+                                <option value="square">Square</option>
+                                <option value="dots">Dots</option>
+                                <option value="rounded">Rounded</option>
+                                <option value="extra-rounded">Extra Rounded</option>
+                                <option value="classy">Classy</option>
+                                <option value="classy-rounded">Classy Rounded</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="corner-square-style" class="block text-sm font-medium text-white/70 mb-2">Corner Style</label>
+                            <select id="corner-square-style" class="w-full input-glass rounded-lg p-3">
+                                <option value="square">Square</option>
+                                <option value="dot">Dot</option>
+                                <option value="extra-rounded">Extra Rounded</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 
                 <button id="btn-save-generated" class="w-full bg-brand-gradient text-white font-semibold py-4 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
@@ -287,7 +357,7 @@
             </div>
         </div>
         
-        <div id="page-result" class="page page-hidden fixed inset-0 flex flex-col p-6 overflow-y-auto">
+        <div id="page-result" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto">
             <div class="flex items-center mb-6 flex-shrink-0">
                 <button class="btn-back p-2 -ml-2 rounded-full hover:bg-white/10">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -302,64 +372,23 @@
                     <div id="qr-canvas-result" class="w-full max-w-[256px] h-[256px] bg-white rounded-lg flex items-center justify-center">
                         </div>
                 </div>
-
                 <div class="card rounded-2xl p-6 space-y-2">
                     <label class="text-sm font-medium text-white/70">Data</label>
                     <p id="result-data-text" class="text-lg break-all">https://example.com</p>
                 </div>
-
                 <div class="card rounded-full p-2 flex justify-around items-center">
                     <button id="btn-copy-result" class="p-4 rounded-full hover:bg-white/10 transition-colors">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.03 1.125 0 1.131.094 1.976 1.057 1.976 2.192V7.5m-9 3v5.25A2.25 2.25 0 006.75 18h10.5a2.25 2.25 0 002.25-2.25V10.5m-12 0h12" />
-                        </svg>
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.03 1.125 0 1.131.094 1.976 1.057 1.976 2.192V7.5m-9 3v5.25A2.25 2.25 0 006.75 18h10.5a2.25 2.25 0 002.25-2.25V10.5m-12 0h12" /></svg>
                     </button>
                     <button id="btn-share-result" class="p-4 rounded-full hover:bg-white/10 transition-colors">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 100-2.186m0 2.186c-.18-.324-.283-.696-.283-1.093s.103-.77.283-1.093m0 2.186l-9.566-5.314" />
-                        </svg>
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 100-2.186m0 2.186c-.18-.324-.283-.696-.283-1.093s.103-.77.283-1.093m0 2.186l-9.566-5.314" /></svg>
                     </button>
                     <button id="btn-download-png" class="p-4 rounded-full hover:bg-white/10 transition-colors">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                        </svg>
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                     </button>
                     <button id="btn-download-svg" class="p-4 rounded-full hover:bg-white/10 transition-colors">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m3 0H3.75M17.25 7.5l3 2.25-3 2.25m3 0h-3.75M13.5 19.5h-3m3 0V4.5" />
-                        </svg>
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m3 0H3.75M17.25 7.5l3 2.25-3 2.25m3 0h-3.75M13.5 19.5h-3m3 0V4.5" /></svg>
                     </button>
-                </div>
-            </div>
-        </div>
-        
-        <div id="page-history" class="page page-hidden fixed inset-0 flex flex-col p-6 overflow-y-auto">
-            <div class="flex items-center mb-6 flex-shrink-0">
-                <button class="btn-back p-2 -ml-2 rounded-full hover:bg-white/10">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                </button>
-                <h1 class="text-2xl font-semibold ml-2">History</h1>
-            </div>
-
-            <div class="flex-grow space-y-6">
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-xl font-semibold text-white">Generated</h2>
-                        <button id="clear-generated-history" class="text-sm text-brand-pink hover:text-brand-pink/80">Clear All</button>
-                    </div>
-                    <div id="generated-history-list" class="space-y-3">
-                        </div>
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-xl font-semibold text-white">Scanned</h2>
-                        <button id="clear-scanned-history" class="text-sm text-brand-pink hover:text-brand-pink/80">Clear All</button>
-                    </div>
-                    <div id="scanned-history-list" class="space-y-3">
-                        </div>
                 </div>
             </div>
         </div>
@@ -379,13 +408,12 @@
             
             // --- QR Instance ---
             let currentQRData = "https://example.com";
+            let logoImage = null;
             
             // Initialize QR Code Styling for Generator
             const qrCanvasGenerate = document.getElementById('qr-canvas-generate');
             const qrCodeGenerate = new QRCodeStyling({
-                width: 200,
-                height: 200,
-                data: currentQRData,
+                width: 200, height: 200, data: currentQRData,
                 dotsOptions: { color: "#c058f3", type: "square" },
                 backgroundOptions: { color: "#ffffff" },
                 cornersSquareOptions: { type: "square" },
@@ -397,9 +425,7 @@
             // Initialize QR Code Styling for Result Page
             const qrCanvasResult = document.getElementById('qr-canvas-result');
             const qrCodeResult = new QRCodeStyling({
-                width: 256,
-                height: 256,
-                data: currentQRData,
+                width: 256, height: 256, data: currentQRData,
                 dotsOptions: { color: "#c058f3", type: "square" },
                 backgroundOptions: { color: "#ffffff" },
                 cornersSquareOptions: { type: "square" },
@@ -410,6 +436,8 @@
 
             // --- Page Navigation ---
             const pages = document.querySelectorAll('.page');
+            const appPages = document.querySelectorAll('.app-page');
+            const tabButtons = document.querySelectorAll('.tab-btn');
             
             function showPage(pageId) {
                 // Stop scanning when leaving scan page
@@ -418,33 +446,66 @@
                 }
                 
                 pages.forEach(page => {
-                    if (page.id === pageId) {
-                        page.classList.remove('page-hidden');
-                    } else {
-                        page.classList.add('page-hidden');
-                    }
+                    page.classList.toggle('page-hidden', page.id !== pageId);
                 });
             }
 
-            // Navigation Event Listeners
-            document.getElementById('btn-start').addEventListener('click', () => showPage('page-main'));
-            document.getElementById('btn-goto-scan').addEventListener('click', () => {
-                showPage('page-scan');
-                startScan(); // Auto-start scan
-            });
-            document.getElementById('btn-goto-generate').addEventListener('click', () => showPage('page-generate'));
-            document.getElementById('btn-goto-history').addEventListener('click', () => {
-                renderHistory();
-                showPage('page-history');
-            });
-
-            document.querySelectorAll('.btn-back').forEach(btn => {
-                btn.addEventListener('click', () => showPage('page-main'));
+            function showAppPage(pageId) {
+                appPages.forEach(page => {
+                    page.classList.toggle('active', page.id === pageId);
+                });
+                tabButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.page === pageId);
+                });
+            }
+            
+            // --- Initial State ---
+            showPage('page-welcome'); // Start on welcome
+            showAppPage('app-page-main'); // Set default app page
+            renderRecentHistory();
+            
+            // --- Navigation Event Listeners ---
+            document.getElementById('btn-start').addEventListener('click', () => {
+                showPage('page-app-shell');
+                renderRecentHistory();
             });
             
-            document.getElementById('btn-stop-scan').addEventListener('click', () => {
-                stopScanStream();
-                showPage('page-main');
+            // Main app buttons
+            document.getElementById('btn-goto-generate').addEventListener('click', () => showPage('page-generate-type'));
+            document.getElementById('btn-goto-scan').addEventListener('click', () => showPage('page-scan'));
+            document.getElementById('btn-see-all-history').addEventListener('click', () => {
+                renderHistory();
+                showAppPage('app-page-history');
+            });
+
+            // Tab bar buttons
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const pageId = btn.dataset.page;
+                    if (pageId.startsWith('app-page-')) {
+                        if (pageId === 'app-page-history') renderHistory();
+                        if (pageId === 'app-page-main') renderRecentHistory();
+                        showAppPage(pageId);
+                    } else {
+                        showPage(pageId);
+                    }
+                });
+            });
+
+            // Back buttons
+            document.querySelectorAll('.btn-back').forEach(btn => {
+                btn.addEventListener('click', () => showPage('page-app-shell'));
+            });
+            document.querySelector('.btn-back-to-type').addEventListener('click', () => showPage('page-generate-type'));
+
+            // Generate type buttons
+            document.querySelectorAll('.btn-generate-type').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const type = btn.dataset.type;
+                    // You could customize the editor based on type here
+                    // For now, just go to the editor
+                    showPage('page-generate-editor');
+                });
             });
 
 
@@ -467,35 +528,16 @@
             }
 
             function copyToClipboard(text) {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        showNotification('Copied to clipboard!');
-                    }).catch(err => {
-                        console.error('Failed to copy: ', err);
-                        showNotification('Failed to copy!', true);
-                    });
-                } else {
-                    // Fallback for insecure contexts
-                    const textArea = document.createElement("textarea");
-                    textArea.value = text;
-                    textArea.style.position = "fixed"; 
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        showNotification('Copied to clipboard!');
-                    } catch (err) {
-                        console.error('Fallback copy failed: ', err);
-                        showNotification('Failed to copy!', true);
-                    }
-                    document.body.removeChild(textArea);
-                }
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('Copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showNotification('Failed to copy!', true);
+                });
             }
 
             function loadHistory(key) {
-                const history = localStorage.getItem(key);
-                return history ? JSON.parse(history) : [];
+                return JSON.parse(localStorage.getItem(key) || '[]');
             }
 
             function saveHistory(key, history) {
@@ -533,6 +575,20 @@
             // --- History Rendering & Logic ---
             const generatedHistoryList = document.getElementById('generated-history-list');
             const scannedHistoryList = document.getElementById('scanned-history-list');
+            const recentHistoryList = document.getElementById('recent-history-list');
+
+            function renderRecentHistory() {
+                const genHistory = loadHistory(GENERATED_HISTORY_KEY);
+                recentHistoryList.innerHTML = '';
+                if (genHistory.length === 0) {
+                    recentHistoryList.innerHTML = '<p class="text-white/50 text-sm text-center">No recent codes.</p>';
+                    return;
+                }
+                // Show max 4 recent items
+                genHistory.slice(0, 4).forEach(item => {
+                    recentHistoryList.appendChild(createHistoryElement(item, 'generated', true));
+                });
+            }
 
             function renderHistory() {
                 // Render Generated History
@@ -558,17 +614,38 @@
                 }
             }
             
-            function createHistoryElement(item, type) {
+            function createHistoryElement(item, type, isRecent = false) {
                 const el = document.createElement('div');
-                el.className = 'history-item card p-4 rounded-lg cursor-pointer transition-colors hover:bg-white/20';
+                el.className = 'history-item card p-4 rounded-lg cursor-pointer transition-colors hover:bg-white/20 flex items-center space-x-4';
                 el.dataset.historyData = item.data;
                 el.dataset.historyType = type;
-                el.innerHTML = `
+                
+                // Create a small QR preview for recent items
+                if (isRecent) {
+                    const previewEl = document.createElement('div');
+                    previewEl.className = 'w-12 h-12 bg-white rounded-md flex-shrink-0';
+                    el.appendChild(previewEl);
+                    
+                    const qrPreview = new QRCodeStyling({
+                        width: 48, height: 48, data: item.data,
+                        dotsOptions: { color: "#0d071a", type: "dots" },
+                        backgroundOptions: { color: "#ffffff" },
+                        cornersSquareOptions: { type: "square" },
+                        cornersDotOptions: { color: "#0d071a" },
+                        image: item.image, // Use saved image if available
+                    });
+                    qrPreview.append(previewEl);
+                }
+                
+                const textEl = document.createElement('div');
+                textEl.className = 'overflow-hidden';
+                textEl.innerHTML = `
                     <p class="history-data text-white font-medium break-all truncate">${item.data}</p>
                     <p class="text-xs text-white/50 mt-1">${formatHistoryTimestamp(item.timestamp)}</p>
                 `;
+                el.appendChild(textEl);
+                
                 el.addEventListener('click', () => {
-                    // Re-use the generator's settings for consistency
                     updateQRCode(item.data); // Update generator
                     dataInput.value = item.data; // Update generator input
                     showResultPage(item.data); // Show result page
@@ -580,6 +657,7 @@
             document.getElementById('clear-generated-history').addEventListener('click', () => {
                 saveHistory(GENERATED_HISTORY_KEY, []);
                 renderHistory();
+                renderRecentHistory();
             });
             document.getElementById('clear-scanned-history').addEventListener('click', () => {
                 saveHistory(SCANNED_HISTORY_KEY, []);
@@ -597,7 +675,6 @@
             const clearLogoBtn = document.getElementById('clear-logo');
             const saveGeneratedBtn = document.getElementById('btn-save-generated');
 
-            let logoImage = null;
             dataInput.value = currentQRData; // Set initial value
 
             // Function to update QR code
@@ -608,19 +685,10 @@
                 qrCodeGenerate.update({
                     data: data,
                     image: logoImage,
-                    dotsOptions: {
-                        color: dotColorInput.value,
-                        type: dotStyleSelect.value
-                    },
-                    backgroundOptions: {
-                        color: bgColorInput.value
-                    },
-                    cornersSquareOptions: {
-                        type: cornerSquareSelect.value
-                    },
-                    cornersDotOptions: {
-                        color: cornerDotColorInput.value
-                    }
+                    dotsOptions: { color: dotColorInput.value, type: dotStyleSelect.value },
+                    backgroundOptions: { color: bgColorInput.value },
+                    cornersSquareOptions: { type: cornerSquareSelect.value },
+                    cornersDotOptions: { color: cornerDotColorInput.value }
                 });
             }
 
@@ -657,7 +725,7 @@
                 const history = loadHistory(GENERATED_HISTORY_KEY);
                 // Prevent duplicates
                 if (!history.find(item => item.data === data)) {
-                    history.unshift({ data: data, timestamp: new Date().toISOString() });
+                    history.unshift({ data: data, timestamp: new Date().toISOString(), image: logoImage });
                     saveHistory(GENERATED_HISTORY_KEY, history);
                 }
                 
@@ -665,50 +733,43 @@
             });
             
             // --- Result Page Actions ---
-            document.getElementById('btn-copy-result').addEventListener('click', () => {
-                copyToClipboard(currentQRData);
-            });
-            
+            document.getElementById('btn-copy-result').addEventListener('click', () => copyToClipboard(currentQRData));
             document.getElementById('btn-share-result').addEventListener('click', () => {
                 if (navigator.share) {
-                    navigator.share({
-                        title: 'QR Code Data',
-                        text: currentQRData,
-                    }).catch(err => console.error('Share failed:', err));
+                    navigator.share({ title: 'QR Code Data', text: currentQRData, })
+                        .catch(err => console.error('Share failed:', err));
                 } else {
                     showNotification('Share not supported on this device.', true);
                 }
             });
-
-            document.getElementById('btn-download-png').addEventListener('click', () => {
-                qrCodeResult.download({ name: 'qr-code', extension: 'png' });
-            });
-
-            document.getElementById('btn-download-svg').addEventListener('click', () => {
-                qrCodeResult.download({ name: 'qr-code', extension: 'svg' });
-            });
+            document.getElementById('btn-download-png').addEventListener('click', () => qrCodeResult.download({ name: 'qr-code', extension: 'png' }));
+            document.getElementById('btn-download-svg').addEventListener('click', () => qrCodeResult.download({ name: 'qr-code', extension: 'svg' }));
 
 
             // --- QR Scanner Logic ---
             const video = document.getElementById('scan-video');
             const canvasEl = document.getElementById('scan-canvas');
             const canvas = canvasEl.getContext('2d');
+            const scanOverlay = document.getElementById('scan-overlay');
+            const startScanBtn = document.getElementById('btn-start-scan');
 
             async function startScan() {
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: 'environment' }
-                    });
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                     
                     video.srcObject = stream;
                     video.setAttribute('playsinline', true);
                     video.play();
                     
+                    // Hide overlay, show video
+                    video.classList.remove('hidden');
+                    scanOverlay.classList.add('hidden');
+                    
                     animationFrameId = requestAnimationFrame(tick);
 
                 } catch (err) {
                     console.error("Error accessing camera:", err);
-                    showPage('page-main'); // Go back to main menu
+                    showPage('page-app-shell'); // Go back to main menu
                     showNotification('Error: Could not access camera.', true);
                 }
             }
@@ -723,6 +784,9 @@
                     stream = null;
                 }
                 video.srcObject = null;
+                // Show overlay, hide video
+                video.classList.add('hidden');
+                scanOverlay.classList.remove('hidden');
             }
 
             function tick() {
@@ -733,42 +797,33 @@
                     
                     try {
                         const imageData = canvas.getImageData(0, 0, canvasEl.width, canvasEl.height);
-                        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                            inversionAttempts: "dontInvert",
-                        });
+                        const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
 
                         if (code) {
                             stopScanStream(); // Stop after successful scan
                             
                             // Save to history
-                            const history = loadHistory(SCANNED_HISTORY_KEY);
-                            if (!history.find(item => item.data === code.data)) {
-                                history.unshift({ data: code.data, timestamp: new Date().toISOString() });
-                                saveHistory(SCANNED_HISTORY_KEY, history);
+                            const scanHistory = loadHistory(SCANNED_HISTORY_KEY);
+                            if (!scanHistory.find(item => item.data === code.data)) {
+                                scanHistory.unshift({ data: code.data, timestamp: new Date().toISOString() });
+                                saveHistory(SCANNED_HISTORY_KEY, scanHistory);
                             }
                             
                             // Show result page
-                            // We need to update the generator settings to match the scan
-                            // For simplicity, we'll just use the default style for a scanned code
                             dataInput.value = code.data; // Update generator input
                             updateQRCode(code.data); // Update generator QR
                             showResultPage(code.data); // Show result page
                             
                             return; // Stop the tick loop
                         }
-                    } catch (err) {
-                        console.error("jsQR error:", err);
-                    }
+                    } catch (err) { console.error("jsQR error:", err); }
                 }
-                
                 if (animationFrameId) {
                     animationFrameId = requestAnimationFrame(tick);
                 }
             }
             
-            // --- Initial Load ---
-            showPage('page-welcome'); // Start on the welcome page
-            updateQRCode(); // Run once on load to show the default QR code
+            startScanBtn.addEventListener('click', startScan);
         });
     </script>
 </body>
