@@ -30,6 +30,7 @@
                         'brand-light': '#1a0e38',
                         'brand-pink': '#e45b8b',
                         'brand-purple': '#c058f3',
+                        'brand-yellow': '#f5d143', // From scanner reference
                     },
                     backgroundImage: {
                         'brand-gradient': 'linear-gradient(to right, #c058f3, #e45b8b)',
@@ -169,6 +170,52 @@
             display: block;
             max-width: 100%;
         }
+        
+        /* NEW: Scanner Frame Styles */
+        #scanner-frame {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 70vw;
+            height: 70vw;
+            max-width: 280px;
+            max-height: 280px;
+        }
+        .scanner-corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 6px solid #f5d143; /* brand-yellow */
+        }
+        #scanner-corner-tl { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
+        #scanner-corner-tr { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
+        #scanner-corner-bl { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
+        #scanner-corner-br { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
+        
+        #scanner-laser {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 3px;
+            background: #e45b8b; /* brand-pink */
+            box-shadow: 0 0 10px #e45b8b;
+            animation: scan 3s infinite ease-in-out;
+        }
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(calc(70vw - 3px)); }
+            100% { transform: translateY(0); }
+        }
+        /* Max height animation */
+        @media (min-width: 400px) { /* 280px / 0.7 = 400px */
+            @keyframes scan {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(277px); } /* 280px - 3px */
+                100% { transform: translateY(0); }
+            }
+        }
     </style>
 </head>
 <body class="bg-brand-dark text-white antialiased h-[100dvh] w-screen overflow-hidden">
@@ -179,26 +226,10 @@
     
     <div class="relative h-full w-full">
 
-        <div id="page-onboarding" class="page flex flex-col items-center justify-between p-8 bg-gradient-to-br from-brand-light to-brand-dark">
+        <div id="page-get-started" class="page flex flex-col items-center justify-between p-8 bg-brand-dark">
             <div class="flex-grow flex flex-col items-center justify-center text-center">
-                <div class="w-48 h-48 card rounded-3xl flex items-center justify-center mb-12 p-4 border-2 border-brand-purple/50 shadow-brand-purple/20 shadow-2xl">
-                    <svg class="w-32 h-32 text-brand-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 9.375v-4.5zM3.75 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 19.125v-4.5zM13.5 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 9.375v-4.5z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 19.125v-4.5z" />
-                    </svg>
-                </div>
-                <h1 class="text-4xl font-bold mb-4">Generate QR</h1>
-                <p class="text-lg text-white/70 max-w-xs">Create and scan QR codes instantly for links, text, contacts, or Wi-Fi.</p>
-            </div>
-            <button id="btn-next-onboarding" class="w-full max-w-xs bg-brand-gradient text-white font-semibold py-4 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
-                Next
-            </button>
-        </div>
-
-        <div id="page-welcome" class="page page-hidden flex flex-col items-center justify-between p-8 bg-gradient-to-br from-brand-light to-brand-dark">
-            <div class="flex-grow flex flex-col items-center justify-center text-center">
-                <div class="w-32 h-32 card rounded-3xl flex items-center justify-center mb-8">
-                    <svg class="w-20 h-20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <div class="w-40 h-40 card rounded-3xl flex items-center justify-center mb-12 p-4 border-2 border-brand-yellow/30">
+                    <svg class="w-24 h-24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 9.375v-4.5zM3.75 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 19.125v-4.5zM13.5 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 9.375v-4.5z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 19.125v-4.5z" />
                     </svg>
@@ -288,7 +319,7 @@
         
         <div id="page-generate-type" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto">
             <div class="flex items-center mb-6 flex-shrink-0">
-                <button class="btn-back p-2 -ml-2 rounded-full hover:bg-white/10">
+                <button class="btn-back-to-shell p-2 -ml-2 rounded-full hover:bg-white/10">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
@@ -348,7 +379,7 @@
                     <input type="text" id="contact-org" class="w-full input-glass rounded-lg p-3" placeholder="Example Inc.">
                 </div>
                 <button id="btn-create-contact-card" class="w-full bg-brand-gradient text-white font-semibold py-4 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
-                    Generate Code
+                    Go to Editor
                 </button>
             </div>
         </div>
@@ -357,11 +388,38 @@
             <div class="relative w-full h-full overflow-hidden">
                 <video id="scan-video" playsinline class="w-full h-full object-cover hidden" style="transform: scaleX(-1);"></video>
                 <canvas id="scan-canvas" class="hidden"></canvas>
+                
+                <div id="scan-ui-overlay" class="absolute inset-0 hidden">
+                    <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-10 bg-black/30">
+                        <button class="btn-back-to-shell p-2 rounded-full hover:bg-white/20">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                            </svg>
+                        </button>
+                        <div class="flex space-x-4">
+                            <button id="btn-scan-gallery" class="p-2 rounded-full hover:bg-white/20">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                            </button>
+                            <button id="btn-scan-flash" class="p-2 rounded-full hover:bg-white/20">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="scanner-frame">
+                        <div id="scanner-corner-tl" class="scanner-corner"></div>
+                        <div id="scanner-corner-tr" class="scanner-corner"></div>
+                        <div id="scanner-corner-bl" class="scanner-corner"></div>
+                        <div id="scanner-corner-br" class="scanner-corner"></div>
+                        <div id="scanner-laser"></div>
+                    </div>
+                </div>
             </div>
              
             <div id="scan-overlay" class="absolute inset-0 p-8 flex flex-col items-center justify-between bg-black/80">
                 <div class="w-full flex justify-start">
-                    <button class="btn-back p-2 rounded-full hover:bg-white/20">
+                    <button class="btn-back-to-shell p-2 rounded-full hover:bg-white/20">
                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                         </svg>
@@ -379,16 +437,17 @@
                     Start Camera
                 </button>
             </div>
+            <input type="file" id="scan-upload-input" accept="image/*" class="hidden">
         </div>
 
         <div id="page-generate-editor" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto">
             <div class="flex items-center mb-6 flex-shrink-0">
-                <button class="btn-back-to-type p-2 -ml-2 rounded-full hover:bg-white/10">
+                <button class="btn-back-to-shell p-2 -ml-2 rounded-full hover:bg-white/10">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                 </button>
-                <h1 class="text-2xl font-semibold ml-2">QR Code Editor</h1>
+                <h1 id="editor-title" class="text-2xl font-semibold ml-2">QR Code Editor</h1>
             </div>
 
             <div class="flex flex-col items-center mb-6 card rounded-2xl p-6">
@@ -462,25 +521,32 @@
                 </div>
             </div>
 
-            <div class="fixed bottom-0 left-0 right-0 p-6 bg-brand-dark border-t border-white/10 grid grid-cols-3 gap-4">
-                <button id="btn-save" class="w-full bg-white/90 hover:bg-white text-brand-dark font-semibold py-3 px-4 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                    <span>Save</span>
-                </button>
-                <button id="btn-share" class="w-full bg-white/90 hover:bg-white text-brand-dark font-semibold py-3 px-4 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 100-2.186m0 2.186c-.18-.324-.283-.696-.283-1.093s.103-.77.283-1.093m0 2.186l-9.566-5.314" /></svg>
-                    <span>Share</span>
-                </button>
-                <button id="btn-delete" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12.064 0A48.108 48.108 0 017.625 5.5h8.75a48.108 48.108 0 013.478-.397m-12.064 0L6.18 4.809a2.25 2.25 0 012.244-2.077h8.152a2.25 2.25 0 012.244 2.077L19.23 5.79m-14.456 0h14.456" /></svg>
-                    <span>Delete</span>
-                </button>
+            <div class="fixed bottom-0 left-0 right-0 p-6 bg-brand-dark border-t border-white/10">
+                <div id="editor-actions-generate">
+                     <button id="btn-create-and-save" class="w-full bg-brand-gradient text-white font-semibold py-4 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
+                        Create & Save
+                    </button>
+                </div>
+                <div id="editor-actions-edit" class="grid grid-cols-3 gap-4 hidden">
+                    <button id="btn-save" class="w-full bg-white/90 hover:bg-white text-brand-dark font-semibold py-3 px-4 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        <span>Save</span>
+                    </button>
+                    <button id="btn-share" class="w-full bg-white/90 hover:bg-white text-brand-dark font-semibold py-3 px-4 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 100-2.186m0 2.186c-.18-.324-.283-.696-.283-1.093s.103-.77.283-1.093m0 2.186l-9.566-5.314" /></svg>
+                        <span>Share</span>
+                    </button>
+                    <button id="btn-delete" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12.064 0A48.108 48.108 0 017.625 5.5h8.75a48.108 48.108 0 013.478-.397m-12.064 0L6.18 4.809a2.25 2.25 0 012.244-2.077h8.152a2.25 2.25 0 012.244 2.077L19.23 5.79m-14.456 0h14.456" /></svg>
+                        <span>Delete</span>
+                    </button>
+                </div>
             </div>
         </div>
         
         <div id="page-result" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto">
             <div class="flex items-center mb-6 flex-shrink-0">
-                <button class="btn-back p-2 -ml-2 rounded-full hover:bg-white/10">
+                <button class="btn-back-to-shell p-2 -ml-2 rounded-full hover:bg-white/10">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
@@ -545,6 +611,8 @@
             let currentQRData = "https://example.com";
             let logoImage = null;
             let cropper = null; // Cropper instance
+            let currentVideoTrack = null; // NEW: For flash
+            let isFlashOn = false; // NEW: Flash state
 
             // --- 2. DOM ELEMENT VARIABLES ---
             // Page Containers
@@ -559,7 +627,8 @@
             const scannedHistoryList = document.getElementById('scanned-history-list');
             const recentHistoryList = document.getElementById('recent-history-list');
             
-            // Generator Elements
+            // Editor Elements
+            const editorTitle = document.getElementById('editor-title');
             const qrCanvasGenerate = document.getElementById('qr-canvas-generate');
             const dataInput = document.getElementById('qr-data');
             const dotStyleSelect = document.getElementById('dot-style');
@@ -574,12 +643,17 @@
             const marginSlider = document.getElementById('qr-margin');
             const marginValue = document.getElementById('qr-margin-value');
             
+            // Editor Button Containers
+            const editorActionsGenerate = document.getElementById('editor-actions-generate');
+            const editorActionsEdit = document.getElementById('editor-actions-edit');
+            
             // Editor Buttons
+            const createAndSaveBtn = document.getElementById('btn-create-and-save');
             const saveBtn = document.getElementById('btn-save');
             const shareBtn = document.getElementById('btn-share');
             const deleteBtn = document.getElementById('btn-delete');
             
-            // NEW: Contact Form
+            // Contact Form
             const createContactBtn = document.getElementById('btn-create-contact-card');
             const contactName = document.getElementById('contact-name');
             const contactPhone = document.getElementById('contact-phone');
@@ -588,14 +662,18 @@
 
             // Result Page Elements
             const qrCanvasResult = document.getElementById('qr-canvas-result');
-            const smartActionButton = document.getElementById('btn-smart-action'); // NEW
+            const smartActionButton = document.getElementById('btn-smart-action');
             
             // Scanner Elements
             const video = document.getElementById('scan-video');
             const canvasEl = document.getElementById('scan-canvas');
             const canvas = canvasEl.getContext('2d');
             const scanOverlay = document.getElementById('scan-overlay');
+            const scanUiOverlay = document.getElementById('scan-ui-overlay'); // NEW
             const startScanBtn = document.getElementById('btn-start-scan');
+            const flashBtn = document.getElementById('btn-scan-flash'); // NEW
+            const galleryBtn = document.getElementById('btn-scan-gallery'); // NEW
+            const scanUploadInput = document.getElementById('scan-upload-input'); // NEW
             
             // Cropper Modal Elements
             const cropperModal = document.getElementById('cropper-modal');
@@ -693,7 +771,7 @@
                 return date.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
             }
             
-            // NEW: Smart Action Helper
+            // Smart Action Helper
             function getDataType(data) {
                 if (data.startsWith('http://') || data.startsWith('https://')) {
                     if (data.includes('wa.me/')) return 'whatsapp';
@@ -721,7 +799,7 @@
                 });
                 document.getElementById('result-data-text').textContent = data;
                 
-                // NEW: Update Smart Action Button
+                // Update Smart Action Button
                 const type = getDataType(data);
                 switch(type) {
                     case 'url':
@@ -819,7 +897,7 @@
                 `;
                 el.appendChild(textEl);
                 
-                // NEW: Click logic separation
+                // Click logic separation
                 if (type === 'scanned') {
                     // Scanned items open the result page
                     el.addEventListener('click', () => {
@@ -830,11 +908,27 @@
                     el.addEventListener('click', () => {
                         dataInput.value = item.data;
                         logoImage = item.image || null; 
-                        updateQRCode(item.data); 
-                        showPage('page-generate-editor');
+                        // We can't restore styles, so we just load the data and logo
+                        updateQRCode(item.data);
+                        // NEW: Set editor to "Edit" mode
+                        showEditor('edit');
                     });
                 }
                 return el;
+            }
+            
+            // NEW: Show Editor in specific mode
+            function showEditor(mode) {
+                if(mode === 'edit') {
+                    editorTitle.textContent = 'QR Code Editor';
+                    editorActionsGenerate.classList.add('hidden');
+                    editorActionsEdit.classList.remove('hidden');
+                } else {
+                    editorTitle.textContent = 'Generate QR Code';
+                    editorActionsGenerate.classList.remove('hidden');
+                    editorActionsEdit.classList.add('hidden');
+                }
+                showPage('page-generate-editor');
             }
 
             // Generator Logic
@@ -852,7 +946,7 @@
                 });
             }
             
-            // NEW: Contact Card Formatter
+            // Contact Card Formatter
             function createVCard() {
                 const name = contactName.value;
                 const phone = contactPhone.value;
@@ -875,19 +969,26 @@
                 dataInput.value = vCard;
                 clearLogoBtn.click(); // Clear logo for contact cards
                 updateQRCode();
-                showPage('page-generate-editor');
+                showEditor('generate'); // Show editor in "Generate" mode
             }
-
-            // Scanner Logic
+            
+            // --- NEW: Scanner Functions ---
             async function startScan() {
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    
                     video.srcObject = stream;
                     video.setAttribute('playsinline', true);
                     video.play();
+                    
                     video.classList.remove('hidden');
                     scanOverlay.classList.add('hidden');
+                    scanUiOverlay.classList.remove('hidden');
+                    
+                    currentVideoTrack = stream.getVideoTracks()[0]; // Save track for flash
+                    
                     animationFrameId = requestAnimationFrame(tick);
+
                 } catch (err) {
                     console.error("Error accessing camera:", err);
                     showPage('page-app-shell');
@@ -900,13 +1001,71 @@
                     cancelAnimationFrame(animationFrameId);
                     animationFrameId = null;
                 }
+                if (currentVideoTrack) {
+                    toggleFlash(false); // Ensure flash is off
+                    currentVideoTrack = null;
+                }
                 if (stream) {
                     stream.getTracks().forEach(track => track.stop());
                     stream = null;
                 }
                 video.srcObject = null;
                 video.classList.add('hidden');
+                scanUiOverlay.classList.add('hidden');
                 scanOverlay.classList.remove('hidden');
+                isFlashOn = false;
+                flashBtn.classList.remove('text-brand-yellow');
+            }
+
+            function toggleFlash(forceState = null) {
+                if (!currentVideoTrack) return;
+                
+                const capabilities = currentVideoTrack.getCapabilities();
+                if (!capabilities.torch) {
+                    showNotification('Flash is not available on this device.', true);
+                    return;
+                }
+                
+                isFlashOn = (forceState !== null) ? forceState : !isFlashOn;
+                currentVideoTrack.applyConstraints({
+                    advanced: [{ torch: isFlashOn }]
+                });
+                flashBtn.classList.toggle('text-brand-yellow', isFlashOn);
+            }
+
+            function scanImageFromFile(file) {
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        canvasEl.width = img.width;
+                        canvasEl.height = img.height;
+                        canvas.drawImage(img, 0, 0, img.width, img.height);
+                        try {
+                            const imageData = canvas.getImageData(0, 0, canvasEl.width, canvasEl.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
+                            
+                            if (code) {
+                                // Save to scanned history
+                                const scanHistory = loadHistory(SCANNED_HISTORY_KEY);
+                                if (!scanHistory.find(item => item.data === code.data)) {
+                                    scanHistory.unshift({ data: code.data, timestamp: new Date().toISOString() });
+                                    saveHistory(SCANNED_HISTORY_KEY, scanHistory);
+                                }
+                                showResultPage(code.data);
+                            } else {
+                                showNotification('No QR code found in image.', true);
+                            }
+                        } catch (err) {
+                            console.error("jsQR error:", err);
+                            showNotification('Could not scan image.', true);
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             }
 
             function tick() {
@@ -927,7 +1086,6 @@
                                 saveHistory(SCANNED_HISTORY_KEY, scanHistory);
                             }
                             
-                            // NEW: Show result page instead of editor
                             showResultPage(code.data);
                             return;
                         }
@@ -942,9 +1100,6 @@
             // --- 5. EVENT LISTENERS ---
             
             // Onboarding & Welcome
-            document.getElementById('btn-next-onboarding').addEventListener('click', () => {
-                showPage('page-welcome');
-            });
             document.getElementById('btn-start').addEventListener('click', () => {
                 showPage('page-app-shell');
                 renderRecentHistory();
@@ -972,8 +1127,8 @@
                 });
             });
 
-            // Back Buttons
-            document.querySelectorAll('.btn-back').forEach(btn => {
+            // Back Buttons (FIXED)
+            document.querySelectorAll('.btn-back-to-shell').forEach(btn => {
                 btn.addEventListener('click', () => showPage('page-app-shell'));
             });
             document.querySelector('.btn-back-to-type').addEventListener('click', () => showPage('page-generate-type'));
@@ -997,12 +1152,12 @@
                         marginSlider.value = 5;
                         marginValue.textContent = 5;
                         updateQRCode();
-                        showPage('page-generate-editor');
+                        showEditor('generate'); // Show editor in "Generate" mode
                     }
                 });
             });
             
-            // NEW: Contact Form Button
+            // Contact Form Button
             createContactBtn.addEventListener('click', createVCard);
 
             // History Clear Buttons
@@ -1047,19 +1202,32 @@
                 updateQRCode();
             });
             
-            // Editor Button Listeners
-            saveBtn.addEventListener('click', () => {
+            // Function to save code (used by 2 buttons)
+            function saveCurrentCode() {
                 const data = dataInput.value;
                 if (!data || data.trim() === '') {
                     showNotification('Cannot save empty data!', true);
-                    return;
+                    return false;
                 }
                 let history = loadHistory(GENERATED_HISTORY_KEY);
                 history = history.filter(item => item.data !== data); 
                 history.unshift({ data: data, timestamp: new Date().toISOString(), image: logoImage });
                 saveHistory(GENERATED_HISTORY_KEY, history);
-                showNotification('Saved to history!');
                 renderRecentHistory();
+                return true;
+            }
+
+            // Editor Button Listeners
+            createAndSaveBtn.addEventListener('click', () => {
+                if (saveCurrentCode()) {
+                    showNotification('Created & Saved!');
+                    showPage('page-app-shell'); // Go back home after creation
+                }
+            });
+            saveBtn.addEventListener('click', () => {
+                if (saveCurrentCode()) {
+                    showNotification('Changes Saved!');
+                }
             });
 
             shareBtn.addEventListener('click', () => {
@@ -1080,9 +1248,7 @@
                 } else {
                     saveHistory(GENERATED_HISTORY_KEY, newHistory);
                     showNotification('Deleted from history!');
-                    dataInput.value = 'https://example.com';
-                    clearLogoBtn.click();
-                    updateQRCode();
+                    showPage('page-app-shell'); // Go back home
                 }
                 renderRecentHistory();
             });
@@ -1143,11 +1309,17 @@
 
             // Scanner Page
             startScanBtn.addEventListener('click', startScan);
+            flashBtn.addEventListener('click', () => toggleFlash());
+            galleryBtn.addEventListener('click', () => scanUploadInput.click());
+            scanUploadInput.addEventListener('change', (e) => {
+                scanImageFromFile(e.target.files[0]);
+                e.target.value = null; // Reset input
+            });
             
             
             // --- 6. INITIAL STATE CALLS ---
             dataInput.value = currentQRData; // Set initial form value
-            showPage('page-onboarding'); // NEW: Start on onboarding
+            showPage('page-get-started'); // NEW: Start on "Get Started"
             showAppPage('app-page-main'); // Set default app page
             renderRecentHistory(); // Populate recent history on home page
         });
