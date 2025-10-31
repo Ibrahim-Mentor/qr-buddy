@@ -398,20 +398,55 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- LocalStorage Keys ---
+            // --- 1. STATE VARIABLES (No DOM) ---
             const GENERATED_HISTORY_KEY = 'qrHistory_generated';
             const SCANNED_HISTORY_KEY = 'qrHistory_scanned';
-
-            // --- QR Scanner State Variables ---
             let animationFrameId = null;
             let stream = null;
-            
-            // --- QR Instance ---
             let currentQRData = "https://example.com";
             let logoImage = null;
+
+            // --- 2. DOM ELEMENT VARIABLES ---
+            // Page Containers
+            const pages = document.querySelectorAll('.page');
+            const appPages = document.querySelectorAll('.app-page');
             
-            // Initialize QR Code Styling for Generator
+            // Tab Bar & Navigation
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            
+            // History Lists
+            const generatedHistoryList = document.getElementById('generated-history-list');
+            const scannedHistoryList = document.getElementById('scanned-history-list');
+            const recentHistoryList = document.getElementById('recent-history-list');
+            
+            // Generator Elements
             const qrCanvasGenerate = document.getElementById('qr-canvas-generate');
+            const dataInput = document.getElementById('qr-data');
+            const dotStyleSelect = document.getElementById('dot-style');
+            const cornerSquareSelect = document.getElementById('corner-square-style');
+            const dotColorInput = document.getElementById('dot-color');
+            const bgColorInput = document.getElementById('bg-color');
+            const cornerDotColorInput = document.getElementById('corner-dot-color');
+            const logoUpload = document.getElementById('logo-upload');
+            const clearLogoBtn = document.getElementById('clear-logo');
+            const saveGeneratedBtn = document.getElementById('btn-save-generated');
+
+            // Result Page Elements
+            const qrCanvasResult = document.getElementById('qr-canvas-result');
+            
+            // Scanner Elements
+            const video = document.getElementById('scan-video');
+            const canvasEl = document.getElementById('scan-canvas');
+            const canvas = canvasEl.getContext('2d');
+            const scanOverlay = document.getElementById('scan-overlay');
+            const startScanBtn = document.getElementById('btn-start-scan');
+
+            // Notification Element
+            const notificationEl = document.getElementById('clipboard-notification');
+            let notificationTimer;
+
+
+            // --- 3. QR INSTANCE SETUP ---
             const qrCodeGenerate = new QRCodeStyling({
                 width: 200, height: 200, data: currentQRData,
                 dotsOptions: { color: "#c058f3", type: "square" },
@@ -422,8 +457,6 @@
             });
             qrCodeGenerate.append(qrCanvasGenerate);
             
-            // Initialize QR Code Styling for Result Page
-            const qrCanvasResult = document.getElementById('qr-canvas-result');
             const qrCodeResult = new QRCodeStyling({
                 width: 256, height: 256, data: currentQRData,
                 dotsOptions: { color: "#c058f3", type: "square" },
@@ -433,18 +466,15 @@
                 imageOptions: { crossOrigin: "anonymous", margin: 5, imageSize: 0.4 }
             });
             qrCodeResult.append(qrCanvasResult);
-
-            // --- Page Navigation ---
-            const pages = document.querySelectorAll('.page');
-            const appPages = document.querySelectorAll('.app-page');
-            const tabButtons = document.querySelectorAll('.tab-btn');
             
+            
+            // --- 4. FUNCTION DEFINITIONS ---
+            
+            // Page Navigation
             function showPage(pageId) {
-                // Stop scanning when leaving scan page
                 if (pageId !== 'page-scan' && stream) {
                     stopScanStream();
                 }
-                
                 pages.forEach(page => {
                     page.classList.toggle('page-hidden', page.id !== pageId);
                 });
@@ -458,61 +488,8 @@
                     btn.classList.toggle('active', btn.dataset.page === pageId);
                 });
             }
-            
-            // --- Initial State ---
-            showPage('page-welcome'); // Start on welcome
-            showAppPage('app-page-main'); // Set default app page
-            renderRecentHistory();
-            
-            // --- Navigation Event Listeners ---
-            document.getElementById('btn-start').addEventListener('click', () => {
-                showPage('page-app-shell');
-                renderRecentHistory();
-            });
-            
-            // Main app buttons
-            document.getElementById('btn-goto-generate').addEventListener('click', () => showPage('page-generate-type'));
-            document.getElementById('btn-goto-scan').addEventListener('click', () => showPage('page-scan'));
-            document.getElementById('btn-see-all-history').addEventListener('click', () => {
-                renderHistory();
-                showAppPage('app-page-history');
-            });
 
-            // Tab bar buttons
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const pageId = btn.dataset.page;
-                    if (pageId.startsWith('app-page-')) {
-                        if (pageId === 'app-page-history') renderHistory();
-                        if (pageId === 'app-page-main') renderRecentHistory();
-                        showAppPage(pageId);
-                    } else {
-                        showPage(pageId);
-                    }
-                });
-            });
-
-            // Back buttons
-            document.querySelectorAll('.btn-back').forEach(btn => {
-                btn.addEventListener('click', () => showPage('page-app-shell'));
-            });
-            document.querySelector('.btn-back-to-type').addEventListener('click', () => showPage('page-generate-type'));
-
-            // Generate type buttons
-            document.querySelectorAll('.btn-generate-type').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const type = btn.dataset.type;
-                    // You could customize the editor based on type here
-                    // For now, just go to the editor
-                    showPage('page-generate-editor');
-                });
-            });
-
-
-            // --- Helper Functions ---
-            const notificationEl = document.getElementById('clipboard-notification');
-            let notificationTimer;
-
+            // Helpers
             function showNotification(message, isError = false) {
                 clearTimeout(notificationTimer);
                 notificationEl.textContent = message;
@@ -549,12 +526,10 @@
                 return date.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
             }
             
-            // --- Update Result Page ---
+            // Result Page Logic
             function showResultPage(data) {
-                currentQRData = data; // Store data for downloads
-                
-                // Update QR code on result page
-                const options = qrCodeGenerate.options; // Get current style from generator
+                currentQRData = data;
+                const options = qrCodeGenerate.options;
                 qrCodeResult.update({
                     data: data,
                     dotsOptions: options.dotsOptions,
@@ -563,20 +538,11 @@
                     cornersDotOptions: options.cornersDotOptions,
                     image: options.image,
                 });
-                
-                // Update data text
                 document.getElementById('result-data-text').textContent = data;
-                
-                // Show the page
                 showPage('page-result');
             }
 
-
-            // --- History Rendering & Logic ---
-            const generatedHistoryList = document.getElementById('generated-history-list');
-            const scannedHistoryList = document.getElementById('scanned-history-list');
-            const recentHistoryList = document.getElementById('recent-history-list');
-
+            // History Logic
             function renderRecentHistory() {
                 const genHistory = loadHistory(GENERATED_HISTORY_KEY);
                 recentHistoryList.innerHTML = '';
@@ -584,14 +550,13 @@
                     recentHistoryList.innerHTML = '<p class="text-white/50 text-sm text-center">No recent codes.</p>';
                     return;
                 }
-                // Show max 4 recent items
                 genHistory.slice(0, 4).forEach(item => {
                     recentHistoryList.appendChild(createHistoryElement(item, 'generated', true));
                 });
             }
 
             function renderHistory() {
-                // Render Generated History
+                // Generated
                 const genHistory = loadHistory(GENERATED_HISTORY_KEY);
                 generatedHistoryList.innerHTML = '';
                 if (genHistory.length === 0) {
@@ -601,8 +566,7 @@
                         generatedHistoryList.appendChild(createHistoryElement(item, 'generated'));
                     });
                 }
-
-                // Render Scanned History
+                // Scanned
                 const scanHistory = loadHistory(SCANNED_HISTORY_KEY);
                 scannedHistoryList.innerHTML = '';
                 if (scanHistory.length === 0) {
@@ -620,19 +584,15 @@
                 el.dataset.historyData = item.data;
                 el.dataset.historyType = type;
                 
-                // Create a small QR preview for recent items
                 if (isRecent) {
                     const previewEl = document.createElement('div');
                     previewEl.className = 'w-12 h-12 bg-white rounded-md flex-shrink-0';
                     el.appendChild(previewEl);
-                    
                     const qrPreview = new QRCodeStyling({
                         width: 48, height: 48, data: item.data,
                         dotsOptions: { color: "#0d071a", type: "dots" },
                         backgroundOptions: { color: "#ffffff" },
-                        cornersSquareOptions: { type: "square" },
-                        cornersDotOptions: { color: "#0d071a" },
-                        image: item.image, // Use saved image if available
+                        image: item.image,
                     });
                     qrPreview.append(previewEl);
                 }
@@ -646,42 +606,17 @@
                 el.appendChild(textEl);
                 
                 el.addEventListener('click', () => {
-                    updateQRCode(item.data); // Update generator
-                    dataInput.value = item.data; // Update generator input
-                    showResultPage(item.data); // Show result page
+                    updateQRCode(item.data);
+                    dataInput.value = item.data;
+                    showResultPage(item.data);
                 });
                 return el;
             }
 
-            // Clear history buttons
-            document.getElementById('clear-generated-history').addEventListener('click', () => {
-                saveHistory(GENERATED_HISTORY_KEY, []);
-                renderHistory();
-                renderRecentHistory();
-            });
-            document.getElementById('clear-scanned-history').addEventListener('click', () => {
-                saveHistory(SCANNED_HISTORY_KEY, []);
-                renderHistory();
-            });
-
-            // --- QR Generator Logic ---
-            const dataInput = document.getElementById('qr-data');
-            const dotStyleSelect = document.getElementById('dot-style');
-            const cornerSquareSelect = document.getElementById('corner-square-style');
-            const dotColorInput = document.getElementById('dot-color');
-            const bgColorInput = document.getElementById('bg-color');
-            const cornerDotColorInput = document.getElementById('corner-dot-color');
-            const logoUpload = document.getElementById('logo-upload');
-            const clearLogoBtn = document.getElementById('clear-logo');
-            const saveGeneratedBtn = document.getElementById('btn-save-generated');
-
-            dataInput.value = currentQRData; // Set initial value
-
-            // Function to update QR code
+            // Generator Logic
             function updateQRCode(dataOverride) {
                 const data = dataOverride || dataInput.value || " ";
-                currentQRData = data; // Keep track of current data
-                
+                currentQRData = data;
                 qrCodeGenerate.update({
                     data: data,
                     image: logoImage,
@@ -692,84 +627,19 @@
                 });
             }
 
-            // Event Listeners for generator
-            [dataInput, dotStyleSelect, cornerSquareSelect, dotColorInput, bgColorInput, cornerDotColorInput].forEach(el => {
-                el.addEventListener('input', () => updateQRCode());
-                el.addEventListener('change', () => updateQRCode());
-            });
-
-            logoUpload.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        logoImage = reader.result;
-                        updateQRCode();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            clearLogoBtn.addEventListener('click', () => {
-                logoImage = null;
-                logoUpload.value = ''; // Clear file input
-                updateQRCode();
-            });
-
-            saveGeneratedBtn.addEventListener('click', () => {
-                const data = dataInput.value;
-                if (!data || data.trim() === '') {
-                    showNotification('Cannot save empty data!', true);
-                    return;
-                }
-                const history = loadHistory(GENERATED_HISTORY_KEY);
-                // Prevent duplicates
-                if (!history.find(item => item.data === data)) {
-                    history.unshift({ data: data, timestamp: new Date().toISOString(), image: logoImage });
-                    saveHistory(GENERATED_HISTORY_KEY, history);
-                }
-                
-                showResultPage(data); // Show the result page
-            });
-            
-            // --- Result Page Actions ---
-            document.getElementById('btn-copy-result').addEventListener('click', () => copyToClipboard(currentQRData));
-            document.getElementById('btn-share-result').addEventListener('click', () => {
-                if (navigator.share) {
-                    navigator.share({ title: 'QR Code Data', text: currentQRData, })
-                        .catch(err => console.error('Share failed:', err));
-                } else {
-                    showNotification('Share not supported on this device.', true);
-                }
-            });
-            document.getElementById('btn-download-png').addEventListener('click', () => qrCodeResult.download({ name: 'qr-code', extension: 'png' }));
-            document.getElementById('btn-download-svg').addEventListener('click', () => qrCodeResult.download({ name: 'qr-code', extension: 'svg' }));
-
-
-            // --- QR Scanner Logic ---
-            const video = document.getElementById('scan-video');
-            const canvasEl = document.getElementById('scan-canvas');
-            const canvas = canvasEl.getContext('2d');
-            const scanOverlay = document.getElementById('scan-overlay');
-            const startScanBtn = document.getElementById('btn-start-scan');
-
+            // Scanner Logic
             async function startScan() {
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                    
                     video.srcObject = stream;
                     video.setAttribute('playsinline', true);
                     video.play();
-                    
-                    // Hide overlay, show video
                     video.classList.remove('hidden');
                     scanOverlay.classList.add('hidden');
-                    
                     animationFrameId = requestAnimationFrame(tick);
-
                 } catch (err) {
                     console.error("Error accessing camera:", err);
-                    showPage('page-app-shell'); // Go back to main menu
+                    showPage('page-app-shell');
                     showNotification('Error: Could not access camera.', true);
                 }
             }
@@ -784,7 +654,6 @@
                     stream = null;
                 }
                 video.srcObject = null;
-                // Show overlay, hide video
                 video.classList.add('hidden');
                 scanOverlay.classList.remove('hidden');
             }
@@ -794,27 +663,20 @@
                     canvasEl.height = video.videoHeight;
                     canvasEl.width = video.videoWidth;
                     canvas.drawImage(video, 0, 0, canvasEl.width, canvasEl.height);
-                    
                     try {
                         const imageData = canvas.getImageData(0, 0, canvasEl.width, canvasEl.height);
                         const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
-
                         if (code) {
-                            stopScanStream(); // Stop after successful scan
-                            
-                            // Save to history
+                            stopScanStream();
                             const scanHistory = loadHistory(SCANNED_HISTORY_KEY);
                             if (!scanHistory.find(item => item.data === code.data)) {
                                 scanHistory.unshift({ data: code.data, timestamp: new Date().toISOString() });
                                 saveHistory(SCANNED_HISTORY_KEY, scanHistory);
                             }
-                            
-                            // Show result page
-                            dataInput.value = code.data; // Update generator input
-                            updateQRCode(code.data); // Update generator QR
-                            showResultPage(code.data); // Show result page
-                            
-                            return; // Stop the tick loop
+                            dataInput.value = code.data;
+                            updateQRCode(code.data);
+                            showResultPage(code.data);
+                            return;
                         }
                     } catch (err) { console.error("jsQR error:", err); }
                 }
@@ -823,7 +685,116 @@
                 }
             }
             
+
+            // --- 5. EVENT LISTENERS ---
+            
+            // Welcome Page
+            document.getElementById('btn-start').addEventListener('click', () => {
+                showPage('page-app-shell');
+                renderRecentHistory();
+            });
+            
+            // Main App Buttons
+            document.getElementById('btn-goto-generate').addEventListener('click', () => showPage('page-generate-type'));
+            document.getElementById('btn-goto-scan').addEventListener('click', () => showPage('page-scan'));
+            document.getElementById('btn-see-all-history').addEventListener('click', () => {
+                renderHistory();
+                showAppPage('app-page-history');
+            });
+
+            // Tab Bar
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const pageId = btn.dataset.page;
+                    if (pageId.startsWith('app-page-')) {
+                        if (pageId === 'app-page-history') renderHistory();
+                        if (pageId === 'app-page-main') renderRecentHistory();
+                        showAppPage(pageId);
+                    } else {
+                        showPage(pageId);
+                    }
+                });
+            });
+
+            // Back Buttons
+            document.querySelectorAll('.btn-back').forEach(btn => {
+                btn.addEventListener('click', () => showPage('page-app-shell'));
+            });
+            document.querySelector('.btn-back-to-type').addEventListener('click', () => showPage('page-generate-type'));
+
+            // Generate Type Buttons
+            document.querySelectorAll('.btn-generate-type').forEach(btn => {
+                btn.addEventListener('click', () => showPage('page-generate-editor'));
+            });
+
+            // History Clear Buttons
+            document.getElementById('clear-generated-history').addEventListener('click', () => {
+                saveHistory(GENERATED_HISTORY_KEY, []);
+                renderHistory();
+                renderRecentHistory();
+            });
+            document.getElementById('clear-scanned-history').addEventListener('click', () => {
+                saveHistory(SCANNED_HISTORY_KEY, []);
+                renderHistory();
+            });
+
+            // Generator Form
+            [dataInput, dotStyleSelect, cornerSquareSelect, dotColorInput, bgColorInput, cornerDotColorInput].forEach(el => {
+                el.addEventListener('input', () => updateQRCode());
+                el.addEventListener('change', () => updateQRCode());
+            });
+            logoUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        logoImage = reader.result;
+                        updateQRCode();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            clearLogoBtn.addEventListener('click', () => {
+                logoImage = null;
+                logoUpload.value = '';
+                updateQRCode();
+            });
+            saveGeneratedBtn.addEventListener('click', () => {
+                const data = dataInput.value;
+                if (!data || data.trim() === '') {
+                    showNotification('Cannot save empty data!', true);
+                    return;
+                }
+                const history = loadHistory(GENERATED_HISTORY_KEY);
+                if (!history.find(item => item.data === data)) {
+                    history.unshift({ data: data, timestamp: new Date().toISOString(), image: logoImage });
+                    saveHistory(GENERATED_HISTORY_KEY, history);
+                }
+                showResultPage(data);
+            });
+            
+            // Result Page Actions
+            document.getElementById('btn-copy-result').addEventListener('click', () => copyToClipboard(currentQRData));
+            document.getElementById('btn-share-result').addEventListener('click', () => {
+                if (navigator.share) {
+                    navigator.share({ title: 'QR Code Data', text: currentQRData, })
+                        .catch(err => console.error('Share failed:', err));
+                } else {
+                    showNotification('Share not supported on this device.', true);
+                }
+            });
+            document.getElementById('btn-download-png').addEventListener('click', () => qrCodeResult.download({ name: 'qr-code', extension: 'png' }));
+            document.getElementById('btn-download-svg').addEventListener('click', () => qrCodeResult.download({ name: 'qr-code', extension: 'svg' }));
+
+            // Scanner Page
             startScanBtn.addEventListener('click', startScan);
+            
+            
+            // --- 6. INITIAL STATE CALLS ---
+            dataInput.value = currentQRData; // Set initial form value
+            showPage('page-welcome'); // Start on welcome
+            showAppPage('app-page-main'); // Set default app page
+            renderRecentHistory(); // Populate recent history on home page
         });
     </script>
 </body>
