@@ -738,7 +738,7 @@
             const SCANNED_HISTORY_KEY = 'qrHistory_scanned';
             let animationFrameId = null;
             let stream = null;
-            let currentQRData = "";
+            let currentQRData = "https://example.com";
             let logoImage = null;
             let cropper = null; // Cropper instance
             let currentVideoTrack = null; // For flash
@@ -1490,7 +1490,7 @@
                         showPage('page-generate-contact');
                     } else {
                         // Reset form for URL/Text
-                        dataInput.value = (type === 'url') ? '' : 'Your text here';
+                        dataInput.value = (type === 'url') ? 'https://example.com' : 'Your text here';
                         logoImage = null;
                         logoUpload.value = '';
                         marginSlider.value = 5;
