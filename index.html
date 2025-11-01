@@ -171,7 +171,7 @@
             max-width: 100%;
         }
         
-        /* NEW: Scanner Frame Styles */
+        /* Scanner Frame Styles */
         #scanner-frame {
             position: absolute;
             left: 50%;
@@ -521,7 +521,7 @@
                 </div>
             </div>
 
-            <div class=" bottom-0 left-0 right-0 p-6 bg-brand-dark border-t border-white/10">
+            <div class="fixed bottom-0 left-0 right-0 p-6 bg-brand-dark border-t border-white/10">
                 <div id="editor-actions-generate">
                      <button id="btn-create-and-save" class="w-full bg-brand-gradient text-white font-semibold py-4 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
                         Create & Save
@@ -559,9 +559,42 @@
                     <div id="qr-canvas-result" class="w-full max-w-[256px] h-[256px] bg-white rounded-lg flex items-center justify-center">
                         </div>
                 </div>
-                <div class="card rounded-2xl p-6 space-y-2">
-                    <label class="text-sm font-medium text-white/70">Data</label>
-                    <p id="result-data-text" class="text-lg break-all">https://example.com</p>
+                
+                <div class="card rounded-2xl p-6 space-y-4">
+                    <div id="result-wifi" class="hidden space-y-3">
+                        <h3 class="text-lg font-semibold text-white">Wi-Fi Details</h3>
+                        <div>
+                            <label class="text-sm font-medium text-white/70">Network Name (SSID)</label>
+                            <p id="result-wifi-ssid" class="text-lg"></p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-white/70">Password</label>
+                            <p id="result-wifi-pass" class="text-lg"></p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-white/70">Security Type</label>
+                            <p id="result-wifi-type" class="text-lg"></p>
+                        </div>
+                    </div>
+                    <div id="result-contact" class="hidden space-y-3">
+                        <h3 class="text-lg font-semibold text-white">Contact Details</h3>
+                        <div>
+                            <label class="text-sm font-medium text-white/70">Name</label>
+                            <p id="result-contact-name" class="text-lg"></p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-white/70">Phone</label>
+                            <p id="result-contact-phone" class="text-lg"></p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-white/70">Email</label>
+                            <p id="result-contact-email" class="text-lg"></p>
+                        </div>
+                    </div>
+                    <div id="result-text">
+                        <label class="text-sm font-medium text-white/70">Data</label>
+                        <p id="result-data-text" class="text-lg break-all"></p>
+                    </div>
                 </div>
 
                 <button id="btn-smart-action" class="w-full bg-brand-gradient text-white font-semibold py-4 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
@@ -611,8 +644,9 @@
             let currentQRData = "https://example.com";
             let logoImage = null;
             let cropper = null; // Cropper instance
-            let currentVideoTrack = null; // NEW: For flash
-            let isFlashOn = false; // NEW: Flash state
+            let currentVideoTrack = null; // For flash
+            let isFlashOn = false; // Flash state
+            let lastScanTime = 0; // For scan throttle
 
             // --- 2. DOM ELEMENT VARIABLES ---
             // Page Containers
@@ -663,17 +697,28 @@
             // Result Page Elements
             const qrCanvasResult = document.getElementById('qr-canvas-result');
             const smartActionButton = document.getElementById('btn-smart-action');
+            const resultDataText = document.getElementById('result-data-text');
+            const resultTextContainer = document.getElementById('result-text');
+            // Result Formatted Blocks
+            const resultWifiContainer = document.getElementById('result-wifi');
+            const resultWifiSsid = document.getElementById('result-wifi-ssid');
+            const resultWifiPass = document.getElementById('result-wifi-pass');
+            const resultWifiType = document.getElementById('result-wifi-type');
+            const resultContactContainer = document.getElementById('result-contact');
+            const resultContactName = document.getElementById('result-contact-name');
+            const resultContactPhone = document.getElementById('result-contact-phone');
+            const resultContactEmail = document.getElementById('result-contact-email');
             
             // Scanner Elements
             const video = document.getElementById('scan-video');
             const canvasEl = document.getElementById('scan-canvas');
             const canvas = canvasEl.getContext('2d');
             const scanOverlay = document.getElementById('scan-overlay');
-            const scanUiOverlay = document.getElementById('scan-ui-overlay'); // NEW
+            const scanUiOverlay = document.getElementById('scan-ui-overlay');
             const startScanBtn = document.getElementById('btn-start-scan');
-            const flashBtn = document.getElementById('btn-scan-flash'); // NEW
-            const galleryBtn = document.getElementById('btn-scan-gallery'); // NEW
-            const scanUploadInput = document.getElementById('scan-upload-input'); // NEW
+            const flashBtn = document.getElementById('btn-scan-flash');
+            const galleryBtn = document.getElementById('btn-scan-gallery');
+            const scanUploadInput = document.getElementById('scan-upload-input');
             
             // Cropper Modal Elements
             const cropperModal = document.getElementById('cropper-modal');
@@ -771,63 +816,118 @@
                 return date.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
             }
             
-            // Smart Action Helper
+            // --- Data Parsing Functions ---
             function getDataType(data) {
                 if (data.startsWith('http://') || data.startsWith('https://')) {
                     if (data.includes('wa.me/')) return 'whatsapp';
                     return 'url';
                 }
                 if (data.startsWith('BEGIN:VCARD')) return 'contact';
+                if (data.startsWith('WIFI:')) return 'wifi';
                 if (data.startsWith('tel:')) return 'tel';
                 if (data.startsWith('mailto:')) return 'mailto';
                 if (data.startsWith('SMSTO:')) return 'sms';
                 return 'text';
             }
             
+            function parseVCard(vCard) {
+                let name = '', phone = '', email = '', org = '';
+                const lines = vCard.split('\n');
+                lines.forEach(line => {
+                    if (line.startsWith('FN:')) name = line.substring(3);
+                    if (line.startsWith('TEL;')) phone = line.split(':').pop();
+                    if (line.startsWith('EMAIL:')) email = line.substring(6);
+                    if (line.startsWith('ORG:')) org = line.substring(4);
+                });
+                return { name, phone, email, org };
+            }
+
+            function parseWifi(wifiString) {
+                const ssid = wifiString.match(/S:([^;]+);/);
+                const pass = wifiString.match(/P:([^;]+);/);
+                const type = wifiString.match(/T:([^;]+);/);
+                return {
+                    ssid: ssid ? ssid[1] : 'N/A',
+                    password: pass ? pass[1] : 'N/A',
+                    type: type ? type[1] : 'N/A'
+                };
+            }
+            
             // Result Page Logic
             function showResultPage(data) {
                 currentQRData = data;
-                const options = qrCodeGenerate.options; // Get styles from generator
+                // Use default styles for scanned codes
                 qrCodeResult.update({
                     data: data,
-                    dotsOptions: options.dotsOptions,
-                    backgroundOptions: options.backgroundOptions,
-                    cornersSquareOptions: options.cornersSquareOptions,
-                    cornersDotOptions: options.cornersDotOptions,
-                    image: options.image,
-                    margin: options.margin
+                    dotsOptions: { color: "#0d071a", type: "square" },
+                    backgroundOptions: { color: "#ffffff" },
+                    cornersSquareOptions: { type: "square" },
+                    cornersDotOptions: { color: "#0d071a" },
+                    image: null,
+                    margin: 5
                 });
-                document.getElementById('result-data-text').textContent = data;
                 
-                // Update Smart Action Button
+                // Reset formatted blocks
+                resultWifiContainer.classList.add('hidden');
+                resultContactContainer.classList.add('hidden');
+                resultTextContainer.classList.add('hidden');
+
                 const type = getDataType(data);
+                
+                // Update Smart Action Button & Data
                 switch(type) {
                     case 'url':
                         smartActionButton.textContent = 'Open Link';
                         smartActionButton.classList.remove('hidden');
+                        resultTextContainer.classList.remove('hidden');
+                        resultDataText.textContent = data;
                         break;
                     case 'whatsapp':
                         smartActionButton.textContent = 'Open WhatsApp';
                         smartActionButton.classList.remove('hidden');
+                        resultTextContainer.classList.remove('hidden');
+                        resultDataText.textContent = data;
                         break;
                     case 'contact':
                         smartActionButton.textContent = 'Add Contact';
                         smartActionButton.classList.remove('hidden');
+                        const contact = parseVCard(data);
+                        resultContactName.textContent = contact.name || 'N/A';
+                        resultContactPhone.textContent = contact.phone || 'N/A';
+                        resultContactEmail.textContent = contact.email || 'N/A';
+                        resultContactContainer.classList.remove('hidden');
+                        break;
+                    case 'wifi':
+                        smartActionButton.textContent = 'Connect to Wi-Fi';
+                        smartActionButton.classList.remove('hidden');
+                        const wifi = parseWifi(data);
+                        resultWifiSsid.textContent = wifi.ssid;
+                        resultWifiPass.textContent = wifi.password;
+                        resultWifiType.textContent = wifi.type;
+                        resultWifiContainer.classList.remove('hidden');
                         break;
                     case 'tel':
                         smartActionButton.textContent = 'Call Number';
                         smartActionButton.classList.remove('hidden');
+                        resultTextContainer.classList.remove('hidden');
+                        resultDataText.textContent = data;
                         break;
                     case 'mailto':
                         smartActionButton.textContent = 'Send Email';
                         smartActionButton.classList.remove('hidden');
+                        resultTextContainer.classList.remove('hidden');
+                        resultDataText.textContent = data;
                         break;
                     case 'sms':
                         smartActionButton.textContent = 'Send SMS';
                         smartActionButton.classList.remove('hidden');
+                        resultTextContainer.classList.remove('hidden');
+                        resultDataText.textContent = data;
                         break;
                     default:
                         smartActionButton.classList.add('hidden'); // Hide for plain text
+                        resultTextContainer.classList.remove('hidden');
+                        resultDataText.textContent = data;
                 }
                 
                 showPage('page-result');
@@ -908,16 +1008,14 @@
                     el.addEventListener('click', () => {
                         dataInput.value = item.data;
                         logoImage = item.image || null; 
-                        // We can't restore styles, so we just load the data and logo
-                        updateQRCode(item.data);
-                        // NEW: Set editor to "Edit" mode
+                        updateQRCode(item.data); 
                         showEditor('edit');
                     });
                 }
                 return el;
             }
             
-            // NEW: Show Editor in specific mode
+            // Show Editor in specific mode
             function showEditor(mode) {
                 if(mode === 'edit') {
                     editorTitle.textContent = 'QR Code Editor';
@@ -972,7 +1070,7 @@
                 showEditor('generate'); // Show editor in "Generate" mode
             }
             
-            // --- NEW: Scanner Functions ---
+            // --- Scanner Functions ---
             async function startScan() {
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -985,7 +1083,9 @@
                     scanOverlay.classList.add('hidden');
                     scanUiOverlay.classList.remove('hidden');
                     
-                    currentVideoTrack = stream.getVideoTracks()[0]; // Save track for flash
+                    currentVideoTrack = stream.getVideoTracks()[0];
+                    isFlashOn = false; // Reset flash state
+                    flashBtn.classList.remove('text-brand-yellow');
                     
                     animationFrameId = requestAnimationFrame(tick);
 
@@ -1068,14 +1168,30 @@
                 reader.readAsDataURL(file);
             }
 
-            function tick() {
+            function tick(timestamp) {
+                // Throttle scan to ~10fps (100ms)
+                if (timestamp - lastScanTime < 100) {
+                    animationFrameId = requestAnimationFrame(tick);
+                    return;
+                }
+                lastScanTime = timestamp;
+
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                     canvasEl.height = video.videoHeight;
                     canvasEl.width = video.videoWidth;
                     canvas.drawImage(video, 0, 0, canvasEl.width, canvasEl.height);
+                    
+                    // Calculate scan region (center 70% of the canvas)
+                    const scanRegionSize = 0.7; // 70%
+                    const sx = (canvasEl.width * (1 - scanRegionSize)) / 2;
+                    const sy = (canvasEl.height * (1 - scanRegionSize)) / 2;
+                    const sWidth = canvasEl.width * scanRegionSize;
+                    const sHeight = canvasEl.height * scanRegionSize;
+                    
                     try {
-                        const imageData = canvas.getImageData(0, 0, canvasEl.width, canvasEl.height);
+                        const imageData = canvas.getImageData(sx, sy, sWidth, sHeight);
                         const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+                        
                         if (code) {
                             stopScanStream(); // Stop on success
                             
@@ -1087,7 +1203,7 @@
                             }
                             
                             showResultPage(code.data);
-                            return;
+                            return; // Stop the tick loop
                         }
                     } catch (err) { console.error("jsQR error:", err); }
                 }
@@ -1277,10 +1393,9 @@
             // Result Page Actions
             smartActionButton.addEventListener('click', () => {
                 const type = getDataType(currentQRData);
-                if (type === 'url' || type === 'whatsapp') {
+                if (type === 'url' || type === 'whatsapp' || type === 'tel' || type === 'mailto' || type === 'sms') {
+                    // These are standard browser protocols
                     window.open(currentQRData, '_blank');
-                } else if (type === 'tel' || type === 'mailto' || type === 'sms') {
-                    window.location.href = currentQRData;
                 } else if (type === 'contact') {
                     // Create a .vcf file and download it
                     const blob = new Blob([currentQRData], { type: 'text/vcard' });
@@ -1292,6 +1407,8 @@
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
+                } else if (type === 'wifi') {
+                    showNotification('Cannot auto-connect to Wi-Fi from a browser. Please copy the password.');
                 }
             });
             
@@ -1319,7 +1436,7 @@
             
             // --- 6. INITIAL STATE CALLS ---
             dataInput.value = currentQRData; // Set initial form value
-            showPage('page-get-started'); // NEW: Start on "Get Started"
+            showPage('page-get-started'); // Start on "Get Started"
             showAppPage('app-page-main'); // Set default app page
             renderRecentHistory(); // Populate recent history on home page
         });
