@@ -30,8 +30,7 @@
                         'brand-light': '#1a0e38',
                         'brand-pink': '#e45b8b',
                         'brand-purple': '#c058f3',
-                        'brand-yellow': '#f5d143', // From scanner reference
-                        // NEW: Theme from image_c50bc5.png
+                        'brand-yellow': '#f5d143',
                         'brand-beige': '#EAE6DE',
                         'brand-navy': '#333366',
                     },
@@ -173,8 +172,7 @@
             display: block;
             max-width: 100%;
         }
-        
-        /* Scanner Frame Styles */
+        /* Scanner Overlay Styles */
         #scanner-frame {
             position: absolute;
             left: 50%;
@@ -189,7 +187,7 @@
             position: absolute;
             width: 30px;
             height: 30px;
-            border: 6px solid rgba(192, 88, 243, 0.7); /* brand-purple with 70% opacity */
+            border: 6px solid rgba(192, 88, 243, 0.7); 
         }
         #scanner-corner-tl { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
         #scanner-corner-tr { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
@@ -250,29 +248,36 @@
             transform: translateX(18px);
         }
         
-        /* --- FIXED Frame Preview --- */
-        #frame-preview-container {
+        /* --- FRAME PREVIEW FIX --- */
+        .frame-preview-container {
             position: relative;
             width: 100%;
-            max-width: 200px; /* This was the key change, max-w-[200px] */
-            aspect-ratio: 1 / 1; /* Make it square */
+            aspect-ratio: 1 / 1;
             margin: 0 auto;
         }
-        /* The canvas container, now relative */
-        #qr-canvas-generate {
-            width: 100%;
-            height: 100%;
-            background-color: white; /* Will be hidden by canvas, but good fallback */
+        /* Editor container */
+        #frame-preview-container-editor {
+             max-width: 200px;
+        }
+        /* Result container */
+        #frame-preview-container-result {
+             max-width: 256px;
+        }
+        /* QR Canvas DIV */
+        .qr-canvas-container {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: white;
             border-radius: 0.5rem; /* 8px */
-            overflow: hidden; /* Hide overflowing canvas */
+            overflow: hidden;
         }
         /* The QR library's canvas will fill this */
-        #qr-canvas-generate canvas {
+        .qr-canvas-container canvas {
             width: 100% !important;
             height: 100% !important;
         }
         /* The frame image sits on top */
-        #qr-frame-preview {
+        .qr-frame-preview {
             position: absolute;
             top: 0;
             left: 0;
@@ -415,6 +420,12 @@
                     </svg>
                     <span class="font-semibold">Contact</span>
                 </button>
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="wifi">
+                    <svg class="w-10 h-10 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856a8.25 8.25 0 0113.788 0M1.923 8.674a12 12 0 0119.154 0M12 18.368a.75.75 0 01.75.75v.008a.75.75 0 01-1.5 0v-.008a.75.75 0 01.75-.75z" />
+                    </svg>
+                    <span class="font-semibold">Wi-Fi</span>
+                </button>
             </div>
         </div>
         
@@ -451,9 +462,42 @@
             </div>
         </div>
 
+        <div id="page-generate-wifi" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto">
+            <div class="flex items-center mb-6 flex-shrink-0">
+                <button class="btn-back-to-type p-2 -ml-2 rounded-full hover:bg-white/10">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+                <h1 class="text-2xl font-semibold ml-2">Create Wi-Fi QR</h1>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="wifi-ssid" class="block text-sm font-medium text-white/70 mb-2">Network Name (SSID)</label>
+                    <input type="text" id="wifi-ssid" class="w-full input-glass rounded-lg p-3" placeholder="MyHomeWi-Fi">
+                </div>
+                <div>
+                    <label for="wifi-pass" class="block text-sm font-medium text-white/70 mb-2">Password</label>
+                    <input type="text" id="wifi-pass" class="w-full input-glass rounded-lg p-3" placeholder="MySecretPassword">
+                </div>
+                 <div>
+                    <label for="wifi-type" class="block text-sm font-medium text-white/70 mb-2">Security Type</label>
+                    <select id="wifi-type" class="w-full input-glass rounded-lg p-3">
+                        <option value="WPA">WPA/WPA2</option>
+                        <option value="WEP">WEP</option>
+                        <option value="nopass">None</option>
+                    </select>
+                </div>
+                <button id="btn-create-wifi-card" class="w-full bg-brand-gradient text-white font-semibold py-4 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
+                    Go to Editor
+                </button>
+            </div>
+        </div>
+
         <div id="page-scan" class="page page-hidden flex flex-col bg-black">
             <div class="relative w-full h-full overflow-hidden">
-                <video id="scan-video" playsinline class="w-full h-full object-cover hidden" style="transform: scaleX(-1);"></video>
+                <video id="scan-video" playsinline class="w-full h-full object-cover hidden"></video>
                 <canvas id="scan-canvas" class="hidden"></canvas>
                 
                 <div id="scan-ui-overlay" class="absolute inset-0 hidden">
@@ -475,11 +519,11 @@
                         </div>
                     </div>
                     <div id="scanner-frame">
+                         <div id="scanner-laser"></div>
                         <div id="scanner-corner-tl" class="scanner-corner"></div>
                         <div id="scanner-corner-tr" class="scanner-corner"></div>
                         <div id="scanner-corner-bl" class="scanner-corner"></div>
                         <div id="scanner-corner-br" class="scanner-corner"></div>
-                        <div id="scanner-laser"></div>
                     </div>
                 </div>
             </div>
@@ -518,14 +562,15 @@
             </div>
 
             <div class="flex flex-col items-center mb-6 card rounded-2xl p-6">
-                <div id="frame-preview-container" class="relative w-full max-w-[200px]" style="aspect-ratio: 1 / 1;">
-                    <div id="qr-canvas-generate" class="w-full h-full bg-white rounded-lg overflow-hidden">
+                <div id="frame-preview-container-editor" class="frame-preview-container">
+                    <div id="qr-canvas-generate" class="qr-canvas-container">
                         </div>
-                    <img id="qr-frame-preview" src="" class="absolute top-0 left-0 w-full h-full object-contain pointer-events-none hidden" />
+                    <img id="qr-frame-preview" src="" class="qr-frame-preview hidden" />
                 </div>
             </div>
 
-            <div class="space-y-6 pb-6"> <div>
+            <div class="space-y-6 pb-6">
+                <div>
                     <label for="qr-data" class="block text-sm font-medium text-white/70 mb-2">Data (URL, text, etc.)</label>
                     <textarea id="qr-data" rows="3" class="w-full input-glass rounded-lg p-3" placeholder="https://example.com"></textarea>
                 </div>
@@ -660,10 +705,10 @@
 
             <div class="flex-grow flex flex-col justify-center space-y-6">
                 <div class="flex flex-col items-center card rounded-2xl p-6">
-                    <div id="frame-preview-container-result" class="relative w-full max-w-[256px]" style="aspect-ratio: 1 / 1;">
-                        <div id="qr-canvas-result" class="w-full h-full bg-white rounded-lg overflow-hidden">
+                    <div id="frame-preview-container-result" class="frame-preview-container">
+                        <div id="qr-canvas-result" class="qr-canvas-container">
                             </div>
-                        <img id="qr-frame-preview-result" src="" class="absolute top-0 left-0 w-full h-full object-contain pointer-events-none hidden" />
+                        <img id="qr-frame-preview-result" src="" class="qr-frame-preview hidden" />
                     </div>
                 </div>
                 
@@ -782,7 +827,7 @@
             // Editor Elements
             const editorTitle = document.getElementById('editor-title');
             const qrCanvasGenerate = document.getElementById('qr-canvas-generate');
-            const qrFramePreview = document.getElementById('qr-frame-preview'); // NEW
+            const qrFramePreview = document.getElementById('qr-frame-preview'); 
             const dataInput = document.getElementById('qr-data');
             const dotStyleSelect = document.getElementById('dot-style');
             const cornerSquareSelect = document.getElementById('corner-square-style');
@@ -803,7 +848,7 @@
             // Margin & Frame
             const marginSlider = document.getElementById('qr-margin');
             const marginValue = document.getElementById('qr-margin-value');
-            const frameSelect = document.getElementById('qr-frame'); // NEW
+            const frameSelect = document.getElementById('qr-frame'); 
             
             // Editor Button Containers
             const editorActionsGenerate = document.getElementById('editor-actions-generate');
@@ -821,6 +866,12 @@
             const contactPhone = document.getElementById('contact-phone');
             const contactEmail = document.getElementById('contact-email');
             const contactOrg = document.getElementById('contact-org');
+            
+            // Wi-Fi Form
+            const createWifiBtn = document.getElementById('btn-create-wifi-card');
+            const wifiSsid = document.getElementById('wifi-ssid');
+            const wifiPass = document.getElementById('wifi-pass');
+            const wifiType = document.getElementById('wifi-type');
 
             // Result Page Elements
             const qrCanvasResult = document.getElementById('qr-canvas-result');
@@ -865,13 +916,13 @@
 
             // --- 3. QR INSTANCE SETUP ---
             const qrCodeGenerate = new QRCodeStyling({
-                width: 200, // <--- FIXED: Set to display size
-                height: 200, // <--- FIXED: Set to display size
+                width: 200, // Display size
+                height: 200, // Display size
                 data: currentQRData,
-                dotsOptions: { color: "#333366", type: "square" }, // New theme
-                backgroundOptions: { color: "#EAE6DE" }, // New theme
-                cornersSquareOptions: { type: "square", color: "#333366" }, // New theme
-                cornersDotOptions: { type: "square", color: "#333366" }, // New theme
+                dotsOptions: { color: "#333366", type: "square" }, 
+                backgroundOptions: { color: "#EAE6DE" }, 
+                cornersSquareOptions: { type: "square", color: "#333366" }, 
+                cornersDotOptions: { type: "square", color: "#333366" }, 
                 imageOptions: { 
                     crossOrigin: "anonymous", 
                     margin: 5, 
@@ -880,12 +931,12 @@
                 },
                 margin: 5
             });
-            qrCodeGenerate.append(qrCanvasGenerate); // <--- FIXED: Append directly
+            qrCodeGenerate.append(qrCanvasGenerate); 
             
             const qrCodeResult = new QRCodeStyling({
                 width: 256, height: 256, data: currentQRData
             });
-            qrCodeResult.append(qrCanvasResult); // Appends to the div
+            qrCodeResult.append(qrCanvasResult); 
             
             
             // --- 4. FUNCTION DEFINITIONS ---
@@ -1143,7 +1194,7 @@
                 if (type === 'scanned') {
                     // Scanned items open the result page
                     el.addEventListener('click', () => {
-                        showResultPage(item.data);
+                        showResultPage(item.data, item.frameUrl); // Pass frameUrl if it exists
                     });
                 } else {
                     // Generated items open the editor
@@ -1228,13 +1279,13 @@
                 const frameUrl = frameAssets[frameKey];
 
                 // 1. Temporarily update to high-res for export
-                qrCodeGenerate.update({ width: width, height: height }); 
+                await qrCodeGenerate.update({ width: width, height: height }); 
                 
                 // 2. Get the QR code data URL
                 const qrDataUrl = await qrCodeGenerate.getRawData("png");
                 
                 // 3. IMPORTANT: Set back to display size
-                qrCodeGenerate.update({ width: 200, height: 200 }); 
+                await qrCodeGenerate.update({ width: 200, height: 200 }); 
 
                 // If no frame, just return the QR code blob
                 if (!frameUrl) {
@@ -1299,6 +1350,31 @@
                 // Load data into editor
                 dataInput.value = vCard;
                 clearLogoBtn.click(); // Clear logo for contact cards
+                updateQRCode();
+                showEditor('generate'); // Show editor in "Generate" mode
+            }
+
+            // NEW: Wi-Fi Card Formatter
+            function createWifiCode() {
+                const ssid = wifiSsid.value;
+                const pass = wifiPass.value;
+                const type = wifiType.value;
+                
+                if (!ssid) {
+                    showNotification('Network Name (SSID) is required.', true);
+                    return;
+                }
+                
+                let wifiString = `WIFI:S:${ssid};T:${type};`;
+                if (type !== 'nopass' && pass) {
+                    wifiString += `P:${pass};;`;
+                } else {
+                    wifiString += ';';
+                }
+                
+                // Load data into editor
+                dataInput.value = wifiString;
+                clearLogoBtn.click(); // Clear logo
                 updateQRCode();
                 showEditor('generate'); // Show editor in "Generate" mode
             }
@@ -1480,7 +1556,9 @@
             document.querySelectorAll('.btn-back-to-shell').forEach(btn => {
                 btn.addEventListener('click', () => showPage('page-app-shell'));
             });
-            document.querySelector('.btn-back-to-type').addEventListener('click', () => showPage('page-generate-type'));
+            document.querySelectorAll('.btn-back-to-type').forEach(btn => {
+                btn.addEventListener('click', () => showPage('page-generate-type'));
+            });
 
             // Generate Type Buttons
             document.querySelectorAll('.btn-generate-type').forEach(btn => {
@@ -1493,6 +1571,12 @@
                         contactEmail.value = '';
                         contactOrg.value = '';
                         showPage('page-generate-contact');
+                    } else if (type === 'wifi') {
+                        // Clear wifi form
+                        wifiSsid.value = '';
+                        wifiPass.value = '';
+                        wifiType.value = 'WPA';
+                        showPage('page-generate-wifi');
                     } else {
                         // Reset form for URL/Text
                         dataInput.value = (type === 'url') ? 'https://example.com' : 'Your text here';
@@ -1512,8 +1596,9 @@
                 });
             });
             
-            // Contact Form Button
+            // Contact & Wi-Fi Form Buttons
             createContactBtn.addEventListener('click', createVCard);
+            createWifiBtn.addEventListener('click', createWifiCode);
 
             // History Clear Buttons
             document.getElementById('clear-generated-history').addEventListener('click', () => {
@@ -1573,7 +1658,12 @@
                 }
                 let history = loadHistory(GENERATED_HISTORY_KEY);
                 history = history.filter(item => item.data !== data); 
-                history.unshift({ data: data, timestamp: new Date().toISOString(), image: logoImage });
+                history.unshift({ 
+                    data: data, 
+                    timestamp: new Date().toISOString(), 
+                    image: logoImage,
+                    frame: frameSelect.value // Save the frame
+                });
                 saveHistory(GENERATED_HISTORY_KEY, history);
                 renderRecentHistory();
                 return true;
@@ -1592,7 +1682,7 @@
                 }
             });
 
-            // SHARE BUTTON FIX
+            // SHARE BUTTON
             shareBtn.addEventListener('click', async () => {
                 try {
                     const blob = await getCombinedImageBlob(1000, 1000); // Use new function
@@ -1687,25 +1777,20 @@
             
             // Download buttons logic
             document.getElementById('btn-download-png').addEventListener('click', async () => {
-                const blob = await getCombinedImageBlob(1000, 1000); // Get combined image
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'qr-code.png';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                // This downloads the RAW QR code, without the frame.
+                // To download with frame, we need to get the options from the *editor*
+                // This is a limitation: the result page doesn't know the frame.
+                // We will just download the raw QR.
+                qrCodeResult.download({ name: 'qr-code', extension: 'png' });
             });
             
             document.getElementById('btn-download-svg').addEventListener('click', () => {
                 // SVG Download is only possible if no frame is selected
-                const frameKey = frameSelect.value;
-                if (frameKey !== 'none') {
-                    showNotification('Cannot download SVG with a frame. Please select "None" for frame and try again.', true);
+                if (qrFramePreviewResult.src) {
+                    showNotification('Cannot download SVG with a frame.', true);
                     return;
                 }
-                qrCodeGenerate.download({ name: 'qr-code', extension: 'svg' });
+                qrCodeResult.download({ name: 'qr-code', extension: 'svg' });
             });
 
             // Scanner Page
