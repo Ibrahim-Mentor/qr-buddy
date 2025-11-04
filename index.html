@@ -387,7 +387,7 @@
             </div>
         </div>
         
-        <div id="page-generate-type" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto">
+        <div id="page-generate-type" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto"><div id="page-generate-type" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto pb-24">
             <div class="flex items-center mb-6 flex-shrink-0">
                 <button class="btn-back-to-shell p-2 -ml-2 rounded-full hover:bg-white/10">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -400,23 +400,107 @@
             <p class="text-white/70 mb-6">What do you want to share?</p>
 
             <div class="grid grid-cols-2 gap-4">
+                
                 <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="url">
                     <svg class="w-10 h-10 text-brand-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                     </svg>
-                    <span class="font-semibold">URL</span>
+                    <span class="font-semibold">Website</span>
                 </button>
-                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="text">
-                    <svg class="w-10 h-10 text-brand-pink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="pdf">
+                    <svg class="w-10 h-10 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
-                    <span class="font-semibold">Text</span>
+                    <span class="font-semibold">PDF</span>
+                </button>
+
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="links">
+                    <svg class="w-10 h-10 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.125 1.125 0 010 2.25H5.625a1.125 1.125 0 010-2.25z" />
+                    </svg>
+                    <span class="font-semibold">List of Links</span>
                 </button>
                 <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="contact">
                     <svg class="w-10 h-10 text-brand-yellow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
-                    <span class="font-semibold">Contact</span>
+                    <span class="font-semibold">vCard</span>
+                </button>
+
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="business">
+                    <svg class="w-10 h-10 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5A.75.75 0 0114.25 12h.01a.75.75 0 01.75.75v7.5m0-7.5A.75.75 0 0013.5 12h.01a.75.75 0 00.75.75v7.5m0-7.5V3.75A1.5 1.5 0 0115.75 3h1.5a1.5 1.5 0 011.5 1.5v16.5m0-16.5h-1.5m1.5 0h.008m-.008 0c.041 0 .082.001.122.002a.75.75 0 01.122.002v16.5h-2.121A2.25 2.25 0 0113.5 18v-1.5m3 4.5v-1.5m0-1.5h-1.5m1.5 0h.008m-.008 0c.041 0 .082.001.122.002a.75.75 0 01.122.002v16.5h-2.121A2.25 2.25 0 0113.5 18v-1.5m3 4.5v-1.5m0-1.5h-1.5M6.75 21v-7.5A.75.75 0 017.5 12h.01a.75.75 0 01.75.75v7.5m0-7.5A.75.75 0 006.75 12h.01a.75.75 0 00.75.75v7.5m0-7.5V3.75A1.5 1.5 0 018.25 3h1.5a1.5 1.5 0 011.5 1.5v16.5m0-16.5h-1.5m1.5 0h.008m-.008 0c.041 0 .082.001.122.002a.75.75 0 01.122.002v16.5h-2.121A2.25 2.25 0 016.75 18v-1.5m3 4.5v-1.5m0-1.5h-1.5m1.5 0h.008m-.008 0c.041 0 .082.001.122.002a.75.75 0 01.122.002v16.5h-2.121A2.25 2.25 0 016.75 18v-1.5m3 4.5v-1.5m0-1.5h-1.5" />
+                    </svg>
+                    <span class="font-semibold">Business</span>
+                </button>
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="video">
+                    <svg class="w-10 h-10 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
+                    </svg>
+                    <span class="font-semibold">Video</span>
+                </button>
+
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="images">
+                    <svg class="w-10 h-10 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                    <span class="font-semibold">Images</span>
+                </button>
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="facebook">
+                    <svg class="w-10 h-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9.19795 21.5H13.198V13.4901H16.8021L17.198 9.50977H13.198V7.5C13.198 6.94772 13.6457 6.5 14.198 6.5H17.198V2.5H14.198C11.4365 2.5 9.19795 4.73858 9.19795 7.5V9.50977H7.19795L6.80206 13.4901H9.19795V21.5Z" />
+                    </svg>
+                    <span class="font-semibold">Facebook</span>
+                </button>
+
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="instagram">
+                    <svg class="w-10 h-10 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                    <span class="font-semibold">Instagram</span>
+                </button>
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="social">
+                    <svg class="w-10 h-10 text-cyan-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A9.06 9.06 0 016 18.719m12 0a9.094 9.094 0 00-3.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A9.06 9.06 0 016 18.719m12 0a9.094 9.094 0 00-3.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A9.06 9.06 0 016 18.719M12 12a3 3 0 11-6 0 3 3 0 016 0zm6 0a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="font-semibold">Social Media</span>
+                </button>
+
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="whatsapp">
+                    <svg class="w-10 h-10 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-3.694 8.25-8.25 8.25a8.187 8.187 0 01-5.182-1.903l-3.078.962.984-2.99a8.187 8.187 0 01-1.903-5.182C3 7.444 6.694 3.75 11.25 3.75S21 7.444 21 12z" />
+                    </svg>
+                    <span class="font-semibold">WhatsApp</span>
+                </button>
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="mp3">
+                    <svg class="w-10 h-10 text-fuchsia-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.002 1.93l-6.25 3.612a2.25 2.25 0 01-2.246 0L3.25 18.233a2.25 2.25 0 01-1.002-1.93V9.714a2.25 2.25 0 011.002-1.93l6.25-3.612a2.25 2.25 0 012.246 0L19.5 7.786a2.25 2.25 0 011.002 1.93v.001z" />
+                    </svg>
+                    <span class="font-semibold">MP3</span>
+                </button>
+
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="menu">
+                    <svg class="w-10 h-10 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                    <span class="font-semibold">Menu</span>
+                </button>
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="apps">
+                    <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                    </svg>
+                    <span class="font-semibold">Apps</span>
+                </button>
+
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="coupon">
+                    <svg class="w-10 h-10 text-lime-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-1.5h5.25m-5.25 0h5.25m-5.25 0h5.25m-5.25 0h5.25M3 13.5h5.25m-5.25 0h5.25m-5.25 0h5.25m-5.25 0h5.25M3 9h5.25M3 7.5h5.25m-5.25 0h5.25m-5.25 0h5.25" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6h19.5v12H2.25V6zM18.75 18a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 6a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                    <span class="font-semibold">Coupon</span>
                 </button>
                 <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="wifi">
                     <svg class="w-10 h-10 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -424,8 +508,16 @@
                     </svg>
                     <span class="font-semibold">Wi-Fi</span>
                 </button>
+
+                <button class="btn-generate-type card p-6 rounded-2xl flex flex-col items-center justify-center space-y-3 transition-transform duration-200 hover:scale-105 active:scale-95" data-type="text">
+                    <svg class="w-10 h-10 text-brand-pink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+                    </svg>
+                    <span class="font-semibold">Text</span>
+                </button>
+
             </div>
-        </div>
+            </div>
         
         <div id="page-generate-contact" class="page page-hidden flex flex-col p-6 bg-brand-dark overflow-y-auto">
             <div class="flex items-center mb-6 flex-shrink-0">
